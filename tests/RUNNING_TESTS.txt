@@ -18,6 +18,26 @@ Unit tests use several PHP extensions that board code does not use. Currently
 the following PHP extensions must be installed and enabled to run unit tests:
 
 - ctype
+- pdo
+- pdo_database for whichever database you want to use for testing (e.g. pdo_sqlite)
+
+Configuration file
+------------------
+
+A configuration file called test_config.php must be created in tests directory
+containing database connection parameters. It is used by tests involving database.
+
+A configuration file for sqlite may be created with the following command:
+
+$ cat >test_config.php <<EOT
+<?php
+\$dbms = 'sqlite';
+\$dbhost = '';
+\$dbport = '';
+\$dbname = ':memory:';
+\$dbuser = '';
+\$dbpasswd = '';
+EOT
 
 Running
 -------
