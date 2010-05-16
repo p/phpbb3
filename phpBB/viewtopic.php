@@ -17,6 +17,8 @@ $phpEx = substr(strrchr(__FILE__, '.'), 1);
 include($phpbb_root_path . 'common.' . $phpEx);
 include($phpbb_root_path . 'includes/functions_display.' . $phpEx);
 include($phpbb_root_path . 'includes/bbcode.' . $phpEx);
+include($phpbb_root_path . 'includes/bbcode/bbcode_parser_base.' . $phpEx);
+include($phpbb_root_path . 'includes/bbcode/bbcode_parser.' . $phpEx);
 
 // Start session management
 $user->session_begin();
@@ -1293,6 +1295,7 @@ if ($bbcode_bitfield !== '')
 {
 	$bbcode = new bbcode(base64_encode($bbcode_bitfield));
 }
+$bbcode_parser = new phpbb_bbcode_parser();
 
 $i_total = sizeof($rowset) - 1;
 $prev_post_id = '';
@@ -1330,14 +1333,11 @@ for ($i = 0, $end = sizeof($post_list); $i < $end; ++$i)
 		$user_cache[$poster_id]['sig_parsed'] = true;
 	}
 
-	// Parse the message and subject
-	$message = censor_text($row['post_text']);
-
 	// Second parse bbcode here
-	if ($row['bbcode_bitfield'])
-	{
-		$bbcode->bbcode_second_pass($message, $row['bbcode_uid'], $row['bbcode_bitfield']);
-	}
+	$message = $bbcode_parser->second_pass($row['post_text']);
+
+	// Parse the message and subject
+	$message = censor_text($message);
 
 	$message = bbcode_nl2br($message);
 	$message = smiley_text($message);
