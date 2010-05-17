@@ -1208,16 +1208,15 @@ class parse_message extends bbcode_firstpass
 			$this->parse($allow_bbcode, $allow_magic_url, $allow_smilies, $this->allow_img_bbcode, $this->allow_flash_bbcode, $this->allow_quote_bbcode, $this->allow_url_bbcode, true);
 		}
 
-		// Replace naughty words such as farty pants
-		$this->message = censor_text($this->message);
-
 		// Parse BBcode
 		if ($allow_bbcode && !empty($this->message))
 		{
 			// We are giving those parameters to be able to use the bbcode class on its own
 			$this->message = $this->bbcode_parser->second_pass($this->message);
-echo htmlspecialchars($this->message) . '<br>';
 		}
+
+		// Replace naughty words such as farty pants
+		$this->message = censor_text($this->message);
 
 		$this->message = bbcode_nl2br($this->message);
 		$this->message = smiley_text($this->message, !$allow_smilies);
@@ -1245,7 +1244,10 @@ echo htmlspecialchars($this->message) . '<br>';
 			$return_message = &$this->message;
 		}
 
-		($custom_bbcode_uid) ? decode_message($this->message, $custom_bbcode_uid) : decode_message($this->message, $this->bbcode_uid);
+		if (!empty($this->message))
+		{
+			$this->message = $this->bbcode_parser->first_pass_decompile($this->message);
+		}
 
 		if (!$update_this_message)
 		{

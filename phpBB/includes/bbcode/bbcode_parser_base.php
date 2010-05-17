@@ -155,7 +155,7 @@ abstract class phpbb_bbcode_parser_base
 	 *
 	 * @var string
 	 */
-	private $num_urls;
+	protected $num_urls;
 
 	/**
 	 * Disabled tags

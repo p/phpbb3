@@ -276,6 +276,7 @@ class phpbb_bbcode_parser extends phpbb_bbcode_parser_base
 
 	protected function url_children(array $attributes)
 	{
+		$this->num_urls++;
 		if (isset($attributes['_']))
 		{
 			return array(true, 'url' => true, '__url' => true, '__smiley' => true);
