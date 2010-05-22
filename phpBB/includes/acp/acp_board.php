@@ -472,6 +472,15 @@ class acp_board
 
 			if ($submit)
 			{
+				// clear all language caches if the default language is changed
+				if ($config_name == 'default_lang')
+				{
+					if ($config_value != $config['default_lang'])
+					{
+						$user->lang_class->lang_cache_purge();
+					}
+				}
+
 				set_config($config_name, $config_value);
 
 				if ($config_name == 'allow_quick_reply' && isset($_POST['allow_quick_reply_enable']))

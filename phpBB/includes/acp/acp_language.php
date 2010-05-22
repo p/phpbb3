@@ -805,6 +805,68 @@ class acp_language
 				}
 			break;
 
+			case 'cache_purge':
+				if (!$lang_id)
+				{
+					trigger_error($user->lang['NO_LANG_ID'] . adm_back_link($this->u_action), E_USER_WARNING);
+				}
+
+				$sql = 'SELECT *
+					FROM ' . LANG_TABLE . '
+					WHERE lang_id = ' . $lang_id;
+				$result = $db->sql_query($sql);
+				$row = $db->sql_fetchrow($result);
+				$db->sql_freeresult($result);
+
+				if (confirm_box(true))
+				{
+					$user->lang_class->lang_cache_purge();
+
+					trigger_error(sprintf($user->lang['LANGUAGE_CACHE_PURGED'], $row['lang_iso']) . adm_back_link($this->u_action));
+				}
+				else
+				{
+					$s_hidden_fields = array(
+						'i'			=> $id,
+						'mode'		=> $mode,
+						'action'	=> $action,
+						'id'		=> $lang_id,
+					);
+					confirm_box(false, $user->lang['CONFIRM_OPERATION'], build_hidden_fields($s_hidden_fields));
+				}
+			break;
+
+			case 'cache_create':
+				if (!$lang_id)
+				{
+					trigger_error($user->lang['NO_LANG_ID'] . adm_back_link($this->u_action), E_USER_WARNING);
+				}
+
+				$sql = 'SELECT *
+					FROM ' . LANG_TABLE . '
+					WHERE lang_id = ' . $lang_id;
+				$result = $db->sql_query($sql);
+				$row = $db->sql_fetchrow($result);
+				$db->sql_freeresult($result);
+
+				if (confirm_box(true))
+				{
+					$user->lang_class->lang_cache_create($row['lang_iso']);
+
+					trigger_error(sprintf($user->lang['LANGUAGE_CACHE_CREATED'], $row['lang_iso']) . adm_back_link($this->u_action));
+				}
+				else
+				{
+					$s_hidden_fields = array(
+						'i'			=> $id,
+						'mode'		=> $mode,
+						'action'	=> $action,
+						'id'		=> $lang_id,
+					);
+					confirm_box(false, $user->lang['CONFIRM_OPERATION'], build_hidden_fields($s_hidden_fields));
+				}
+			break;
+
 			case 'install':
 				$lang_iso = request_var('iso', '');
 				$lang_iso = basename($lang_iso);
@@ -1105,6 +1167,9 @@ class acp_language
 				'U_DETAILS'			=> $this->u_action . "&amp;action=details&amp;id={$row['lang_id']}",
 				'U_DOWNLOAD'		=> $this->u_action . "&amp;action=download&amp;id={$row['lang_id']}",
 				'U_DELETE'			=> $this->u_action . "&amp;action=delete&amp;id={$row['lang_id']}",
+
+				'U_CACHE_PURGE'		=> $this->u_action . "&amp;action=cache_purge&amp;id={$row['lang_id']}",
+				'U_CACHE_CREATE'	=> $this->u_action . "&amp;action=cache_create&amp;id={$row['lang_id']}",
 
 				'ENGLISH_NAME'		=> $row['lang_english_name'],
 				'TAG'				=> $tagstyle,
