@@ -1486,6 +1486,8 @@ class user extends session
 	var $lang_name = false;
 	var $lang_id = false;
 	var $lang_path;
+	var $lang_class;
+
 	var $img_lang;
 	var $img_array = array();
 
@@ -1498,9 +1500,12 @@ class user extends session
 	*/
 	function user()
 	{
-		global $phpbb_root_path;
+		global $phpbb_root_path, $phpEx;
 
 		$this->lang_path = $phpbb_root_path . 'language/';
+
+		include($phpbb_root_path . 'includes/functions_language.' . $phpEx);
+		$this->lang_class = new language();
 	}
 
 	/**
@@ -1580,15 +1585,7 @@ class user extends session
 
 		// We include common language file here to not load it every time a custom language file is included
 		$lang = &$this->lang;
-
-		// Do not suppress error if in DEBUG_EXTRA mode
-		$include_result = (defined('DEBUG_EXTRA')) ? (include $this->lang_path . $this->lang_name . "/common.$phpEx") : (@include $this->lang_path . $this->lang_name . "/common.$phpEx");
-
-		if ($include_result === false)
-		{
-			die('Language file ' . $this->lang_path . $this->lang_name . "/common.$phpEx" . " couldn't be opened.");
-		}
-
+		$this->add_lang('common');
 		$this->add_lang($lang_set);
 		unset($lang_set);
 
@@ -2042,8 +2039,6 @@ class user extends session
 	*/
 	function set_lang(&$lang, &$help, $lang_file, $use_db = false, $use_help = false)
 	{
-		global $phpEx;
-
 		// Make sure the language name is set (if the user setup did not happen it is not set)
 		if (!$this->lang_name)
 		{
@@ -2056,49 +2051,13 @@ class user extends session
 		// - add appropriate variables here, name them as they are used within the language file...
 		if (!$use_db)
 		{
-			if ($use_help && strpos($lang_file, '/') !== false)
+			if ($use_help)
 			{
-				$language_filename = $this->lang_path . $this->lang_name . '/' . substr($lang_file, 0, stripos($lang_file, '/') + 1) . 'help_' . substr($lang_file, stripos($lang_file, '/') + 1) . '.' . $phpEx;
+				$help = $this->lang_class->get_help($this->lang_name, $lang_file);
 			}
 			else
 			{
-				$language_filename = $this->lang_path . $this->lang_name . '/' . (($use_help) ? 'help_' : '') . $lang_file . '.' . $phpEx;
-			}
-
-			if (!file_exists($language_filename))
-			{
-				global $config;
-
-				if ($this->lang_name == 'en')
-				{
-					// The user's selected language is missing the file, the board default's language is missing the file, and the file doesn't exist in /en.
-					$language_filename = str_replace($this->lang_path . 'en', $this->lang_path . $this->data['user_lang'], $language_filename);
-					trigger_error('Language file ' . $language_filename . ' couldn\'t be opened.', E_USER_ERROR);
-				}
-				else if ($this->lang_name == basename($config['default_lang']))
-				{
-					// Fall back to the English Language
-					$this->lang_name = 'en';
-					$this->set_lang($lang, $help, $lang_file, $use_db, $use_help);
-				}
-				else if ($this->lang_name == $this->data['user_lang'])
-				{
-					// Fall back to the board default language
-					$this->lang_name = basename($config['default_lang']);
-					$this->set_lang($lang, $help, $lang_file, $use_db, $use_help);
-				}
-
-				// Reset the lang name
-				$this->lang_name = (file_exists($this->lang_path . $this->data['user_lang'] . "/common.$phpEx")) ? $this->data['user_lang'] : basename($config['default_lang']);
-				return;
-			}
-
-			// Do not suppress error if in DEBUG_EXTRA mode
-			$include_result = (defined('DEBUG_EXTRA')) ? (include $language_filename) : (@include $language_filename);
-
-			if ($include_result === false)
-			{
-				trigger_error('Language file ' . $language_filename . ' couldn\'t be opened.', E_USER_ERROR);
+				$lang = array_merge($lang, $this->lang_class->get_lang($this->lang_name, $lang_file));
 			}
 		}
 		else if ($use_db)
