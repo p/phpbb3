@@ -67,6 +67,7 @@ $lang = array_merge($lang, array(
 	'LANGUAGE_VARIABLE'					=> 'Language variable',
 	'LANG_AUTHOR'						=> 'Language pack author',
 	'LANG_ENGLISH_NAME'					=> 'English name',
+	'LANG_ENTRY_TO_DEPTH'			=> 'Language entry to long: depth = %2$d (max. allowed depth = %2$d)',
 	'LANG_ISO_CODE'						=> 'ISO code',
 	'LANG_LOCAL_NAME'					=> 'Local name',
 

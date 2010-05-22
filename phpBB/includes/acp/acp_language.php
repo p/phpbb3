@@ -16,6 +16,8 @@ if (!defined('IN_PHPBB'))
 	exit;
 }
 
+define('LANG_TABLE_MAX_DEPTH', 5);
+
 /**
 * @package acp
 */
@@ -1265,108 +1267,69 @@ $lang = array_merge($lang, array(
 	}
 
 	/**
-	* Little helper to add some hardcoded template bits
-	*/
-	function add_input_field()
-	{
-		$keys = func_get_args();
-
-		$non_static		= array_shift($keys);
-		$value			= utf8_normalize_nfc(array_shift($keys));
-
-		if (!$non_static)
-		{
-			return '<strong>' . htmlspecialchars($value, ENT_COMPAT, 'UTF-8') . '</strong>';
-		}
-
-		// If more then 270 characters, then we present a textarea, else an input field
-		$textarea = (utf8_strlen($value) > 270) ? true : false;
-		$tpl = '';
-
-		$tpl .= ($textarea) ? '<textarea name="' : '<input type="text" name="';
-		$tpl .= 'entry[' . implode('][', array_map('utf8_htmlspecialchars', $keys)) . ']"';
-
-		$tpl .= ($textarea) ? ' cols="80" rows="5" class="langvalue">' : ' class="langvalue" value="';
-		$tpl .= htmlspecialchars($value, ENT_COMPAT, 'UTF-8');
-		$tpl .= ($textarea) ? '</textarea>' : '" />';
-
-		return $tpl;
-	}
-
-	/**
 	* Print language entries
 	*/
-	function print_language_entries(&$lang_ary, $key_prefix = '', $input_field = true)
+	function print_language_entries(&$lang_ary, $key_prefix = '', $input_field = true, $keys = array(), $depth = 0)
 	{
 		$tpl = '';
+
+		if ($depth > LANG_TABLE_MAX_DEPTH)
+		{
+			// limit array depth to prevent circles
+			global $user;
+
+			$tpl .= '
+			<tr>
+				<td class="row3" colspan="2"><strong><span class="error">' . sprintf($user->lang['LANG_ENTRY_TO_DEPTH'], $depth, LANG_TABLE_MAX_DEPTH) . '</span></strong></td>
+			</tr>';
+			return $tpl;
+		}
 
 		foreach ($lang_ary as $key => $value)
 		{
+			$keys_entry = $keys;
+			$keys_entry[] = $key;
+
 			if (is_array($value))
 			{
 				// Write key
 				$tpl .= '
 				<tr>
-					<td class="row3" colspan="2">' . htmlspecialchars($key_prefix, ENT_COMPAT, 'UTF-8') . '<strong>' . htmlspecialchars($key, ENT_COMPAT, 'UTF-8') . '</strong></td>
+					<td class="row3" colspan="2">' . htmlspecialchars($key_prefix, ENT_COMPAT, 'UTF-8') . str_repeat('&nbsp; ', 2*$depth) . '<strong>' . htmlspecialchars($key, ENT_COMPAT, 'UTF-8') . '</strong></td>
 				</tr>';
 
-				foreach ($value as $_key => $_value)
-				{
-					if (is_array($_value))
-					{
-						// Write key
-						$tpl .= '
-							<tr>
-								<td class="row3" colspan="2">' . htmlspecialchars($key_prefix, ENT_COMPAT, 'UTF-8') . '&nbsp; &nbsp;<strong>' . htmlspecialchars($_key, ENT_COMPAT, 'UTF-8') . '</strong></td>
-							</tr>';
-
-						foreach ($_value as $__key => $__value)
-						{
-							// Write key
-							$tpl .= '
-								<tr>
-									<td class="row1" style="white-space: nowrap;">' . htmlspecialchars($key_prefix, ENT_COMPAT, 'UTF-8') . '<strong>' . htmlspecialchars($__key, ENT_COMPAT, 'UTF-8') . '</strong></td>
-									<td class="row2">';
-
-							$tpl .= $this->add_input_field($input_field, $__value, $key, $_key, $__key);
-
-							$tpl .= '</td>
-								</tr>';
-						}
-					}
-					else
-					{
-						// Write key
-						$tpl .= '
-							<tr>
-								<td class="row1" style="white-space: nowrap;">' . htmlspecialchars($key_prefix, ENT_COMPAT, 'UTF-8') . '<strong>' . htmlspecialchars($_key, ENT_COMPAT, 'UTF-8') . '</strong></td>
-								<td class="row2">';
-
-						$tpl .= $this->add_input_field($input_field, $_value, $key, $_key);
-
-						$tpl .= '</td>
-							</tr>';
-					}
-				}
-
-				$tpl .= '
-				<tr>
-					<td class="spacer" colspan="2">&nbsp;</td>
-				</tr>';
+				$tpl .= $this->print_language_entries($value, $key_prefix, $input_field, $keys_entry, $depth + 1);
 			}
 			else
 			{
 				// Write key
+				$spacer = $depth ? '<span class="row3">' . str_repeat('&nbsp; ', 2*$depth) . "</span>" : '';
+
 				$tpl .= '
 				<tr>
-					<td class="row1" style="white-space: nowrap;">' . htmlspecialchars($key_prefix, ENT_COMPAT, 'UTF-8') . '<strong>' . htmlspecialchars($key, ENT_COMPAT, 'UTF-8') . '</strong></td>
+					<td class="row1" style="white-space: nowrap;">' . htmlspecialchars($key_prefix, ENT_COMPAT, 'UTF-8') . $spacer . '&nbsp;<strong>' . htmlspecialchars($key, ENT_COMPAT, 'UTF-8') . '</strong></td>
 					<td class="row2">';
 
-				$tpl .= $this->add_input_field($input_field, $value, $key);
+				if (!$input_field)
+				{
+					$tpl .= '<strong>' . htmlspecialchars($value, ENT_COMPAT, 'UTF-8') . '</strong>';
+				}
+				else
+				{
+					// If more then 270 characters, then we present a textarea, else an input field
+					$textarea = (utf8_strlen($value) > 270) ? true : false;
 
-				$tpl .= '</td>
-					</tr>';
+					$tpl .= ($textarea) ? '<textarea name="' : '<input type="text" name="';
+					$tpl .= 'entry[' . implode('][', array_map('utf8_htmlspecialchars', $keys_entry)) . ']"';
+
+					$tpl .= ($textarea) ? ' cols="80" rows="5" class="langvalue">' : ' class="langvalue" value="';
+					$tpl .= htmlspecialchars($value, ENT_COMPAT, 'UTF-8');
+					$tpl .= ($textarea) ? '</textarea>' : '" />';
+				}
 			}
+
+			$tpl .= '</td>
+				</tr>';
 		}
 
 		return $tpl;
