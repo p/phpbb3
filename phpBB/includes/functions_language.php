@@ -159,7 +159,7 @@ class language {
 			$lang_data = &$this->read_lang('en');
 			if (isset($lang_data['lang'][$lang_file]))
 			{
-				$lang_cache['data'] = array_merge($lang_cache['data'], $lang_data['lang'][$lang_file]);
+				$lang_cache['data'] = array_merge_replace_recursive($lang_cache['data'], $lang_data['lang'][$lang_file]);
 				$lang_found = 'en';
 			}
 
@@ -169,7 +169,7 @@ class language {
 				$lang_data = &$this->read_lang($lang_default);
 				if (isset($lang_data['lang'][$lang_file]))
 				{
-					$lang_cache['data'] = array_merge($lang_cache['data'], $lang_data['lang'][$lang_file]);
+					$lang_cache['data'] = array_merge_replace_recursive($lang_cache['data'], $lang_data['lang'][$lang_file]);
 					$lang_found = $lang_default;
 				}
 			}
@@ -180,7 +180,7 @@ class language {
 				$lang_data = &$this->read_lang($lang_name);
 				if (isset($lang_data['lang'][$lang_file]))
 				{
-					$lang_cache['data'] = array_merge($lang_cache['data'], $lang_data['lang'][$lang_file]);
+					$lang_cache['data'] = array_merge_replace_recursive($lang_cache['data'], $lang_data['lang'][$lang_file]);
 					$lang_found = $lang_name;
 				}
 			}
@@ -301,7 +301,7 @@ class language {
 					// old style definition
 					if (isset($lang_cache['lang'][$file]))
 					{
-						$lang_cache['lang'][$file] = array_merge($lang_cache['lang'][$file], $lang);
+						$lang_cache['lang'][$file] = array_merge_replace_recursive($lang_cache['lang'][$file], $lang);
 					}
 					else
 					{
@@ -318,7 +318,7 @@ class language {
 					{
 						if (isset($lang_cache['lang'][$lang_file]))
 						{
-							$lang_cache['lang'][$lang_file] = array_merge($lang_cache['lang'][$lang_file], $lang_data);
+							$lang_cache['lang'][$lang_file] = array_merge_replace_recursive($lang_cache['lang'][$lang_file], $lang_data);
 						}
 						else
 						{

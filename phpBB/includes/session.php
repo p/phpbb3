@@ -2057,7 +2057,7 @@ class user extends session
 			}
 			else
 			{
-				$lang = array_merge($lang, $this->lang_class->get_lang($this->lang_name, $lang_file));
+				$lang = array_merge_replace_recursive($lang, $this->lang_class->get_lang($this->lang_name, $lang_file));
 			}
 		}
 		else if ($use_db)
