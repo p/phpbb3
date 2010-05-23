@@ -607,6 +607,9 @@ $lang = array_merge($lang, array(
 	'LOG_LANGUAGE_FILE_REPLACED'	=> '<strong>Replaced language file</strong><br />» %s',
 	'LOG_LANGUAGE_FILE_SUBMITTED'	=> '<strong>Submitted language file and placed in store folder</strong><br />» %s',
 
+	'LAG_LANGUAGE_CACHE_MISS'	=> '<strong>No entry for “<em>%s</em>” found in the language cache.</strong>',
+	'LAG_LANGUAGE_NO_FILE'	=> '<strong>Language file “<em>%s</em>” not found.</strong>',
+
 	'LOG_MASS_EMAIL'		=> '<strong>Sent mass e-mail</strong><br />» %s',
 
 	'LOG_MCP_CHANGE_POSTER'	=> '<strong>Changed poster in topic “%1$s”</strong><br />» from %2$s to %3$s',

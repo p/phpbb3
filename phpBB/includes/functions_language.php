@@ -200,6 +200,8 @@ class language {
 				// fallback: try to load the language file directly
 				global $user, $phpEx;
 
+				add_log('admin', 'LOG_LANGUAGE_CACHE_MISS', $lang_file);
+
 				// try in the following order: user language, board default language, English language
 				$lang_to_test = array_unique(array($lang_name, $lang_default, 'en'));
 
@@ -223,7 +225,8 @@ class language {
 				if (empty($lang_cache['used']))
 				{
 					// no language file found
-					trigger_error('Language file "' . $lang_file . '" not found (testet languages: ' . implode(', ', $lang_to_test) . ').', E_USER_ERROR);
+					add_log('admin', 'LOG_LANGUAGE_NO_FILE', $lang_file);
+					trigger_error('Language file “' . $lang_file . '“ not found (testet languages: ' . implode(', ', $lang_to_test) . ').', E_USER_ERROR);
 				}
 			}
 
@@ -274,6 +277,8 @@ class language {
 				// fallback: try to load the language file directly
 				global $user, $phpEx;
 
+				add_log('admin', 'LOG_LANGUAGE_CACHE_MISS', $lang_file);
+
 				// try in the following order: user language, board default language, English language
 				$lang_to_test = array_unique(array($lang_name, $lang_default, 'en'));
 
@@ -303,7 +308,8 @@ class language {
 				if (empty($lang_cache['used']))
 				{
 					// no language file found
-					trigger_error('Help language file ' . $lang_file . ' not found (testet languages: ' . implode(', ', $lang_to_test) . ').', E_USER_ERROR);
+					add_log('admin', 'LOG_LANGUAGE_NO_FILE', $lang_file);
+					trigger_error('Help language file “' . $lang_file . '“ not found (testet languages: ' . implode(', ', $lang_to_test) . ').', E_USER_ERROR);
 				}
 			}
 
