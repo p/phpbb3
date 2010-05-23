@@ -45,6 +45,10 @@ if (!defined('IN_PHPBB'))
 *    An md5 hash of the (real) path to the language files is used to support
 *    different language paths (like for the Support Toolkit).
 *
+*    To use this, the language file must only check for IN_PHPBB! If other
+*    checks are used the creation of the cache will fail and you will see a
+*    blank page.
+*
 * 2. A cache for each language file.
 *
 *    The cache ID '_lang_<lang_name>_path_{md5(<(real)path>)}' is used for

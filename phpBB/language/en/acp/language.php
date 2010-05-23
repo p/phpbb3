@@ -50,6 +50,8 @@ $lang = array_merge($lang, array(
 	'INVALID_LANGUAGE_PACK'		=> 'The selected language pack seems to be not valid. Please verify the language pack and upload it again if necessary.',
 	'INVALID_UPLOAD_METHOD'		=> 'The selected upload method is not valid, please choose a different method.',
 
+	'LANGUAGE_CACHE_PURGED'		=> 'The cache for the language pack <strong>%s</strong> has been successful purged.',
+	'LANGUAGE_CACHE_CREATED'	=> 'The cache for the language pack <strong>%s</strong> has been successful created.',
 	'LANGUAGE_DETAILS_UPDATED'			=> 'Language details successfully updated.',
 	'LANGUAGE_ENTRIES'					=> 'Language entries',
 	'LANGUAGE_ENTRIES_EXPLAIN'			=> 'Here you are able to change existing language pack entries or not already translated ones.<br /><strong>Note:</strong> Once you changed a language file, the changes will be stored within a separate folder for you to download. The changes will not be seen by your users until you replace the original language files at your webspace (by uploading them).',
@@ -66,6 +68,8 @@ $lang = array_merge($lang, array(
 	'LANGUAGE_PACK_USED_BY'				=> 'Used by (including robots)',
 	'LANGUAGE_VARIABLE'					=> 'Language variable',
 	'LANG_AUTHOR'						=> 'Language pack author',
+	'LANG_CACHE_PURGE'				=> 'Purge cache',
+	'LANG_CACHE_CREATE'				=> 'Create cache',
 	'LANG_ENGLISH_NAME'					=> 'English name',
 	'LANG_ENTRY_TO_DEPTH'			=> 'Language entry to long: depth = %2$d (max. allowed depth = %2$d)',
 	'LANG_ISO_CODE'						=> 'ISO code',
