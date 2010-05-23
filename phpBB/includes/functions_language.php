@@ -226,6 +226,7 @@ class language {
 				if (isset($lang_data['help'][$help_file]))
 				{
 					$lang_cache['data'] = $lang_data['help'][$help_file];
+					break;
 				}
 			}
 

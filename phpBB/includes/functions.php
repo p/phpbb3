@@ -4742,7 +4742,7 @@ function phpbb_user_session_handler()
  *
  * The arrays to be merged are passed as arguments to the function.
  *
- * http://php.net/manual/de/function.array-merge-recursive.php
+ * source: http://php.net/manual/de/function.array-merge-recursive.php
  * author: drvali at hotmail dot com
  *
  * @access public

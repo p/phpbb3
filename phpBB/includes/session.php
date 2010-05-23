@@ -1998,8 +1998,6 @@ class user extends session
 	*/
 	function add_lang($lang_set, $use_db = false, $use_help = false)
 	{
-		global $phpEx;
-
 		if (is_array($lang_set))
 		{
 			foreach ($lang_set as $key => $lang_file)
