@@ -53,6 +53,7 @@ if (!defined('IN_PHPBB'))
 *    $array = array(
 *      'file' => '<language file>',
 *      'name' => '<language iso name>',
+*      'used' => array(<all used languages>),
 *      'path' => '<(real) path to the language files>'
 *      'data'	=> array(
 *        '<key>' => '<value>',
@@ -74,6 +75,7 @@ if (!defined('IN_PHPBB'))
 *    $array = array(
 *      'file' => '<language file>',
 *      'name' => '<language iso name>',
+*      'used' => array(<used language>),
 *      'path' => '<(real) path to the language files>'
 *      'help'	=> array(
 *        <help array definition>
@@ -142,17 +144,17 @@ class language {
 	{
 		global $cache;
 
-		$cache_id = "_lang_" . $lang_name . "_path_" . md5($this->get_lang_path() . '/' . $lang_file);
+		$cache_id = "_lang_" . $lang_name . "_path_" . md5($this->get_lang_realpath() . '/' . $lang_file);
 		if (($lang_cache = $cache->get($cache_id)) === false)
 		{
 			global $config;
 
 			$lang_default = basename($config['default_lang']);
-			$lang_found = '';
 
 			$lang_cache['file'] = $lang_file;
 			$lang_cache['name'] = $lang_name;
-			$lang_cache['path'] = $this->get_lang_path();
+			$lang_cache['used'] = array();
+			$lang_cache['path'] = $this->get_lang_realpath();
 			$lang_cache['data'] = array();
 
 			// first load the English language as fallback
@@ -160,7 +162,7 @@ class language {
 			if (isset($lang_data['lang'][$lang_file]))
 			{
 				$lang_cache['data'] = array_merge_replace_recursive($lang_cache['data'], $lang_data['lang'][$lang_file]);
-				$lang_found = 'en';
+				$lang_cache['used'][] = 'en';
 			}
 
 			// merge it with the board default language
@@ -170,7 +172,7 @@ class language {
 				if (isset($lang_data['lang'][$lang_file]))
 				{
 					$lang_cache['data'] = array_merge_replace_recursive($lang_cache['data'], $lang_data['lang'][$lang_file]);
-					$lang_found = $lang_default;
+					$lang_cache['used'][] = $lang_default;
 				}
 			}
 
@@ -181,15 +183,40 @@ class language {
 				if (isset($lang_data['lang'][$lang_file]))
 				{
 					$lang_cache['data'] = array_merge_replace_recursive($lang_cache['data'], $lang_data['lang'][$lang_file]);
-					$lang_found = $lang_name;
+					$lang_cache['used'][] = $lang_name;
 				}
 			}
 
-			if (empty($lang_found))
+			if (empty($lang_cache['used']))
 			{
-				// No language data found
-				trigger_error('Language path ' . $lang_file . ' not defined.', E_USER_WARNING);
-				return array();
+				// fallback: try to load the language file directly
+				global $user, $phpEx;
+
+				// try in the following order: user language, board default language, English language
+				$lang_to_test = array_unique(array($lang_name, $lang_default, 'en'));
+
+				foreach ($lang_to_test as $lang_test)
+				{
+					$lang_filename = $user->lang_path . "$lang_test/$lang_file.$phpEx";
+
+					$lang = array();
+					// Do not suppress error if in DEBUG_EXTRA mode
+					$include_result = defined('DEBUG_EXTRA') ? include($lang_filename) : @include($lang_filename);
+					if ($include_result !== false)
+					{
+						// found a language definition file
+						$lang_cache['file'] = $lang_filename;
+						$lang_cache['used'][] = $lang_test;
+						$lang_cache['data'] = &$lang;
+						break;
+					}
+				}
+
+				if (empty($lang_cache['used']))
+				{
+					// no language file found
+					trigger_error('Language file "' . $lang_file . '" not found (testet languages: ' . implode(', ', $lang_to_test) . ').', E_USER_ERROR);
+				}
 			}
 
 			$cache->put($cache_id, $lang_cache);
@@ -202,39 +229,74 @@ class language {
 	/**
 	* Get help definition (used by session.php:set_lang())
 	* @param string $lang_name requested language
-	* @param string $help_file path for the language help file
+	* @param string $lang_file path for the language help file
 	*/
-	function get_help($lang_name, $help_file)
+	function get_help($lang_name, $lang_file)
 	{
 		global $cache;
 
-		$cache_id = "_lang_" . $lang_name . "_help_" . md5($this->get_lang_path() . '/' . $help_file);
+		$cache_id = "_lang_" . $lang_name . "_help_" . md5($this->get_lang_realpath() . '/' . $lang_file);
 		if (($lang_cache = $cache->get($cache_id)) === false)
 		{
 			global $config;
 
-			$lang_cache['file'] = $help_file;
+			$lang_default = basename($config['default_lang']);
+
+			$lang_cache['file'] = $lang_file;
 			$lang_cache['name'] = $lang_name;
-			$lang_cache['path'] = $this->get_lang_path();
+			$lang_cache['used'] = array();
+			$lang_cache['path'] = $this->get_lang_realpath();
 
 			// try in the following order: user language, board default language, English language
-			$lang_test = array($lang_name, basename($config['default_lang']), 'en');
+			$lang_to_test = array_unique(array($lang_name, $lang_default, 'en'));
 
-			foreach ($lang_test as $l)
+			foreach ($lang_to_test as $lang_test)
 			{
-				$lang_data = &$this->read_lang($l);
-				if (isset($lang_data['help'][$help_file]))
+				$lang_data = &$this->read_lang($lang_test);
+				if (isset($lang_data['help'][$lang_file]))
 				{
-					$lang_cache['data'] = $lang_data['help'][$help_file];
+					$lang_cache['used'][] = $lang_test;
+					$lang_cache['data'] = $lang_data['help'][$lang_file];
 					break;
 				}
 			}
 
 			if (!isset($lang_cache['data']))
 			{
-				// No language data found
-				trigger_error('Language path ' . $help_file . ' not defined.', E_USER_WARNING);
-				return array();
+				// fallback: try to load the language file directly
+				global $user, $phpEx;
+
+				// try in the following order: user language, board default language, English language
+				$lang_to_test = array_unique(array($lang_name, $lang_default, 'en'));
+
+				foreach ($lang_to_test as $lang_test)
+				{
+					if (strpos($lang_file, '/') !== false)
+					{
+						$lang_filename = $user->lang_path . "$lang_test/" . substr($lang_file, 0, stripos($lang_file, '/') + 1) . 'help_' . substr($lang_file, stripos($lang_file, '/') + 1) . '.' . $phpEx;
+					}
+					else
+					{
+						$lang_filename = $user->lang_path . "$lang_test/help_$lang_file.$phpEx";
+					}
+
+					// Do not suppress error if in DEBUG_EXTRA mode
+					$include_result = defined('DEBUG_EXTRA') ? include($lang_filename) : @include($lang_filename);
+					if ($include_result !== false && isset($help))
+					{
+						// found a language definition file
+						$lang_cache['file'] = $lang_filename;
+						$lang_cache['used'][] = $lang_test;
+						$lang_cache['data'] = &$help;
+						break;
+					}
+				}
+
+				if (empty($lang_cache['used']))
+				{
+					// no language file found
+					trigger_error('Help language file ' . $lang_file . ' not found (testet languages: ' . implode(', ', $lang_to_test) . ').', E_USER_ERROR);
+				}
 			}
 
 			$cache->put($cache_id, $lang_cache);
@@ -248,7 +310,7 @@ class language {
 	* get the real path to the language definitions
 	* @access private
 	*/
-	private function get_lang_path()
+	private function get_lang_realpath()
 	{
 		global $user;
 
@@ -264,7 +326,7 @@ class language {
 	{
 		global $cache, $phpEx;
 
-		$lang_path = $this->get_lang_path();
+		$lang_path = $this->get_lang_realpath();
 		$cache_id = '_lang_' . $lang_name . '_' . md5($lang_path);
 
 		if (isset($this->memory[$lang_name]))
