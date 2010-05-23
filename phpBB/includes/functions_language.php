@@ -101,6 +101,7 @@ if (!defined('IN_PHPBB'))
 * corresponding files.
 */
 class language {
+	// internal memory (cache) for loaded language files
 	var $memory = array();
 
 	/**
@@ -131,7 +132,10 @@ class language {
 	{
 		global $cache;
 
+		// clear all language cache data
 		$cache->purge();
+		unset($this->memory);
+		$this->memory = array();
 	}
 
 	/**
@@ -329,9 +333,9 @@ class language {
 		$lang_path = $this->get_lang_realpath();
 		$cache_id = '_lang_' . $lang_name . '_' . md5($lang_path);
 
-		if (isset($this->memory[$lang_name]))
+		if (isset($this->memory[$lang_name][$cache_id]))
 		{
-			return $this->memory[$lang_name];
+			return $this->memory[$lang_name][$cache_id];
 		}
 
 		if (($lang_cache = $cache->get($cache_id)) === false)
@@ -398,7 +402,7 @@ class language {
 		}
 
 		// save the data in the internal cache
-		$this->memory[$lang_name] = &$lang_cache;
+		$this->memory[$lang_name][$cache_id] = &$lang_cache;
 
 		return $lang_cache;
 	}
