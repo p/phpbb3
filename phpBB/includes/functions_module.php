@@ -854,28 +854,20 @@ class p_master
 	{
 		global $user, $phpEx;
 
-		if (file_exists($user->lang_path . $user->lang_name . '/mods'))
+		$lang_files = $user->lang_class->lang_files();
+
+		$add_files = array();
+		foreach ($lang_files as $file)
 		{
-			$add_files = array();
-
-			$dir = @opendir($user->lang_path . $user->lang_name . '/mods');
-
-			if ($dir)
+			if (strpos($file, 'mods/info_' . strtolower($module_class) . '_') === 0)
 			{
-				while (($entry = readdir($dir)) !== false)
-				{
-					if (strpos($entry, 'info_' . strtolower($module_class) . '_') === 0 && substr(strrchr($entry, '.'), 1) == $phpEx)
-					{
-						$add_files[] = 'mods/' . substr(basename($entry), 0, -(strlen($phpEx) + 1));
-					}
-				}
-				closedir($dir);
+				$add_files[] = $file;
 			}
+		}
 
-			if (sizeof($add_files))
-			{
-				$user->add_lang($add_files);
-			}
+		if (sizeof($add_files))
+		{
+			$user->add_lang($add_files);
 		}
 	}
 }

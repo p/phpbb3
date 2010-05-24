@@ -104,6 +104,12 @@ if (!defined('IN_PHPBB'))
 * ./language/<lang name>/mods/ and the definitions will be included into the
 * corresponding files.
 */
+
+define('LANG_CACHE_TYPE_ALL', 1);
+define('LANG_CACHE_TYPE_FILES', 2);
+define('LANG_CACHE_TYPE_HELP', 3);
+define('LANG_CACHE_TYPE_LANG', 4);
+
 class language {
 	// internal memory (cache) for loaded language files
 	var $memory = array();
@@ -143,6 +149,31 @@ class language {
 	}
 
 	/**
+	* Get an array of all available language files
+	*/
+	function lang_files()
+	{
+		global $cache, $config, $user;
+
+		// try in the following order: user language, board default language, English language
+		$lang_to_test = array_unique(array($user->lang_name, basename($config['default_lang']), 'en'));
+
+		$lang_files = array();
+		foreach ($lang_to_test as $lang_test)
+		{
+			if (($files = $cache->get($this->generate_cache_id($this->get_lang_realpath(), LANG_CACHE_TYPE_FILES, $lang_test))) === false)
+			{
+				$lang_cache = $this->get_lang($lang_test, true);
+				$files = array_merge(array_keys($lang_cache['help'], array_keys($lang_cache['lang'])));
+			}
+
+			$lang_files = array_merge($lang_files, $files);
+		}
+
+		return $lang_files;
+	}
+
+	/**
 	* Get language definition (used by session.php:set_lang())
 	* @param string $lang_name requested language
 	* @param string $lang_file path for the language file
@@ -152,7 +183,7 @@ class language {
 	{
 		global $cache;
 
-		$cache_id = "_lang_" . $lang_name . "_path_" . md5($this->get_lang_realpath() . '/' . $lang_file);
+		$cache_id = $this->generate_cache_id($this->get_lang_realpath(), LANG_CACHE_TYPE_LANG, $lang_name, $lang_file);
 		if (($lang_cache = $cache->get($cache_id)) === false)
 		{
 			global $config;
@@ -246,7 +277,7 @@ class language {
 	{
 		global $cache;
 
-		$cache_id = "_lang_" . $lang_name . "_help_" . md5($this->get_lang_realpath() . '/' . $lang_file);
+		$cache_id = $this->generate_cache_id($this->get_lang_realpath(), LANG_CACHE_TYPE_HELP, $lang_name, $lang_file);
 		if (($lang_cache = $cache->get($cache_id)) === false)
 		{
 			global $config;
@@ -336,26 +367,31 @@ class language {
 	* Read all language files for the given language into the cache
 	* @access private
 	*/
-	private function read_lang($lang_name)
+	private function read_lang($lang_name, $force = false)
 	{
 		global $cache, $phpEx;
 
-		$lang_path = $this->get_lang_realpath();
-		$cache_id = '_lang_' . $lang_name . '_' . md5($lang_path);
+		$lang_realpath = $this->get_lang_realpath();
+		$cache_id = $this->generate_cache_id($lang_realpath, LANG_CACHE_TYPE_ALL, $lang_name);
 
 		if (isset($this->memory[$lang_name][$cache_id]))
 		{
 			return $this->memory[$lang_name][$cache_id];
 		}
 
-		if (($lang_cache = $cache->get($cache_id)) === false)
+		if ($force || ($lang_cache = $cache->get($cache_id)) === false)
 		{
 			$lang_cache = array();
 			$lang_cache['name'] = $lang_name;
-			$lang_cache['path'] = $lang_path;
+			$lang_cache['path'] = $lang_realpath;
 
-			$lang_files = $this->get_lang_files("$lang_path/$lang_name", '');
+			$lang_files = $this->get_lang_files("$lang_realpath/$lang_name", '');
 			ksort($lang_files);
+
+			// save file list
+			$cache->put($this->generate_cache_id($lang_realpath, LANG_CACHE_TYPE_FILES, $lang_name), $lang_files);
+			$cache->save();
+
 			foreach($lang_files as $file)
 			{
 				if (strpos($file, 'help_') !== false)
@@ -363,7 +399,7 @@ class language {
 					// special case for help files
 					$file_help = substr($file, 0, stripos($file, 'help_')) . substr($file, stripos($file, 'help_') + 5);
 					$help = array();
-					include("$lang_path/$lang_name/$file.$phpEx");
+					include("$lang_realpath/$lang_name/$file.$phpEx");
 					$lang_cache['help'][$file_help] = $help;
 					unset($help);
 
@@ -371,7 +407,7 @@ class language {
 				}
 
 				$lang = array();
-				include("$lang_path/$lang_name/$file.$phpEx");
+				include("$lang_realpath/$lang_name/$file.$phpEx");
 
 				if (!empty($lang))
 				{
@@ -422,13 +458,13 @@ class language {
 	* (similar to functions_admin.php:filelist())
 	* @access private
 	*/
-	private function get_lang_files($lang_dir, $lang_path)
+	private function get_lang_files($lang_dir, $lang_realpath)
 	{
 		global $phpEx;
 
 		$lang_files = array();
 
-		$dir = @opendir("$lang_dir/$lang_path");
+		$dir = @opendir("$lang_dir/$lang_realpath");
 		if (!$dir)
 		{
 			return $lang_files;
@@ -441,7 +477,7 @@ class language {
 				continue;
 			}
 
-			$file = empty($lang_path) ? $entry : "$lang_path/$entry";
+			$file = empty($lang_realpath) ? $entry : "$lang_realpath/$entry";
 			if (is_dir($lang_dir . '/' . $file))
 			{
 				$lang_files = array_merge($lang_files, $this->get_lang_files($lang_dir, $file));
@@ -458,5 +494,26 @@ class language {
 		closedir($dir);
 
 		return $lang_files;
+	}
+
+	/**
+	* Generate a cache id
+	* @access private
+	*/
+	private function generate_cache_id($lang_realpath, $cache_type, $lang_name, $lang_file = '')
+	{
+		switch ($cache_type)
+		{
+			case LANG_CACHE_TYPE_ALL:
+				return '_lang_' . $lang_name . '_' . md5($lang_realpath);
+			case LANG_CACHE_TYPE_FILES:
+				return '_lang_' . $lang_name . '_files_' . md5($lang_realpath);
+			case LANG_CACHE_TYPE_HELP:
+				return '_lang_' . $lang_name . "_help_" . md5($lang_realpath . '/' . $lang_file);
+			case LANG_CACHE_TYPE_LANG:
+				return '_lang_' . $lang_name . "_path_" . md5($this->get_lang_realpath() . '/' . $lang_file);
+			default:
+				trigger_error('Unknown language cache type “' . $cache_type . '“.', E_USER_ERROR);
+		}
 	}
 }
