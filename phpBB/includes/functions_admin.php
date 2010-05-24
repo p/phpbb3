@@ -3249,37 +3249,28 @@ function tidy_database()
 */
 function add_permission_language()
 {
-	global $user, $phpEx;
+	global $user;
 
 	// First of all, our own file. We need to include it as the first file because it presets all relevant variables.
 	$user->add_lang('acp/permissions_phpbb');
 
-	$files_to_add = array();
+	$lang_files = $user->lang_class->lang_files();
 
-	// Now search in acp and mods folder for permissions_ files.
-	foreach (array('acp/', 'mods/') as $path)
+	$add_files = array();
+	foreach ($lang_files as $file)
 	{
-		$dh = @opendir($user->lang_path . $user->lang_name . '/' . $path);
-
-		if ($dh)
+		if ($file !== 'acp/permissions_phpbb' && (strpos($file, 'acp/permissions_') === 0 || strpos($file, 'mods/permissions_') === 0))
 		{
-			while (($file = readdir($dh)) !== false)
-			{
-				if ($file !== 'permissions_phpbb.' . $phpEx && strpos($file, 'permissions_') === 0 && substr($file, -(strlen($phpEx) + 1)) === '.' . $phpEx)
-				{
-					$files_to_add[] = $path . substr($file, 0, -(strlen($phpEx) + 1));
-				}
-			}
-			closedir($dh);
+			$add_files[] = $file;
 		}
 	}
 
-	if (!sizeof($files_to_add))
+	if (!sizeof($add_files))
 	{
 		return false;
 	}
 
-	$user->add_lang($files_to_add);
+	$user->add_lang($add_files);
 	return true;
 }
 
