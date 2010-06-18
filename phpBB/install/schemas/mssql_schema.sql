@@ -1,6 +1,6 @@
 /*
 
- $Id$
+ $Id: $
 
 */
 
@@ -757,7 +757,7 @@ CREATE TABLE [phpbb_posts] (
 	[icon_id] [int] DEFAULT (0) NOT NULL ,
 	[poster_ip] [varchar] (40) DEFAULT ('') NOT NULL ,
 	[post_time] [int] DEFAULT (0) NOT NULL ,
-	[post_approved] [int] DEFAULT (1) NOT NULL ,
+	[post_visibility] [int] DEFAULT (0) NOT NULL ,
 	[post_reported] [int] DEFAULT (0) NOT NULL ,
 	[enable_bbcode] [int] DEFAULT (1) NOT NULL ,
 	[enable_smilies] [int] DEFAULT (1) NOT NULL ,
@@ -798,7 +798,7 @@ GO
 CREATE  INDEX [poster_id] ON [phpbb_posts]([poster_id]) ON [PRIMARY]
 GO
 
-CREATE  INDEX [post_approved] ON [phpbb_posts]([post_approved]) ON [PRIMARY]
+CREATE  INDEX [post_visibility] ON [phpbb_posts]([post_visibility]) ON [PRIMARY]
 GO
 
 CREATE  INDEX [post_username] ON [phpbb_posts]([post_username]) ON [PRIMARY]
@@ -1428,7 +1428,7 @@ CREATE TABLE [phpbb_topics] (
 	[forum_id] [int] DEFAULT (0) NOT NULL ,
 	[icon_id] [int] DEFAULT (0) NOT NULL ,
 	[topic_attachment] [int] DEFAULT (0) NOT NULL ,
-	[topic_approved] [int] DEFAULT (1) NOT NULL ,
+	[topic_visibility] [int] DEFAULT (0) NOT NULL ,
 	[topic_reported] [int] DEFAULT (0) NOT NULL ,
 	[topic_title] [varchar] (255) DEFAULT ('') NOT NULL ,
 	[topic_poster] [int] DEFAULT (0) NOT NULL ,
@@ -1477,10 +1477,10 @@ GO
 CREATE  INDEX [last_post_time] ON [phpbb_topics]([topic_last_post_time]) ON [PRIMARY]
 GO
 
-CREATE  INDEX [topic_approved] ON [phpbb_topics]([topic_approved]) ON [PRIMARY]
+CREATE  INDEX [topic_visibility] ON [phpbb_topics]([topic_visibility]) ON [PRIMARY]
 GO
 
-CREATE  INDEX [forum_appr_last] ON [phpbb_topics]([forum_id], [topic_approved], [topic_last_post_id]) ON [PRIMARY]
+CREATE  INDEX [forum_appr_last] ON [phpbb_topics]([forum_id], [topic_visibility], [topic_last_post_id]) ON [PRIMARY]
 GO
 
 CREATE  INDEX [fid_time_moved] ON [phpbb_topics]([forum_id], [topic_last_post_time], [topic_moved_id]) ON [PRIMARY]
@@ -1732,4 +1732,5 @@ ALTER TABLE [phpbb_zebra] WITH NOCHECK ADD
 		[zebra_id]
 	)  ON [PRIMARY] 
 GO
+
 

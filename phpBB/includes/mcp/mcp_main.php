@@ -360,9 +360,11 @@ function change_topic_type($action, $topic_ids)
 				$db->sql_query($sql);
 
 				// Do a little forum sync stuff
-				$sql = 'SELECT SUM(t.topic_replies + t.topic_approved) as topic_posts, COUNT(t.topic_approved) as topics_authed
+				// Do not count deleted posts or unapproved posts here
+				$sql = 'SELECT SUM(t.topic_replies + t.topic_visibility) as topic_posts, COUNT(t.topic_visibility) as topics_authed
 					FROM ' . TOPICS_TABLE . ' t
-					WHERE ' . $db->sql_in_set('t.topic_id', $topic_ids);
+					WHERE ' . $db->sql_in_set('t.topic_id', $topic_ids) . '
+						AND ' . $db->sql_in_set('t.topic_visibility', array(ITEM_UNAPPROVED, ITEM_APPROVED));
 				$result = $db->sql_query($sql);
 				$row_data = $db->sql_fetchrow($result);
 				$db->sql_freeresult($result);
@@ -427,9 +429,10 @@ function change_topic_type($action, $topic_ids)
 				$db->sql_query($sql);
 
 				// Do a little forum sync stuff
-				$sql = 'SELECT SUM(t.topic_replies + t.topic_approved) as topic_posts, COUNT(t.topic_approved) as topics_authed
+				$sql = 'SELECT SUM(t.topic_replies + t.topic_visibility) as topic_posts, COUNT(t.topic_visibility) as topics_authed
 					FROM ' . TOPICS_TABLE . ' t
-					WHERE ' . $db->sql_in_set('t.topic_id', $topic_ids);
+					WHERE ' . $db->sql_in_set('t.topic_id', $topic_ids) . '
+						AND ' . $db->sql_in_set('t.topic_visibility', array(ITEM_UNAPPROVED, ITEM_APPROVED));
 				$result = $db->sql_query($sql);
 				$row_data = $db->sql_fetchrow($result);
 				$db->sql_freeresult($result);
@@ -619,7 +622,7 @@ function mcp_move_topic($topic_ids)
 
 		foreach ($topic_data as $topic_id => $topic_info)
 		{
-			if ($topic_info['topic_approved'])
+			if ($topic_info['topic_visibility'] == ITEM_APPROVED)
 			{
 				$topics_authed_moved++;
 				$topic_posts_added++;
@@ -632,7 +635,7 @@ function mcp_move_topic($topic_ids)
 				$topics_removed++;
 				$topic_posts_removed += $topic_info['topic_replies'];
 
-				if ($topic_info['topic_approved'])
+				if ($topic_info['topic_visibility'] == ITEM_APPROVED)
 				{
 					$topics_authed_removed++;
 					$topic_posts_removed++;
@@ -676,13 +679,13 @@ function mcp_move_topic($topic_ids)
 			}
 
 			// Leave a redirection if required and only if the topic is visible to users
-			if ($leave_shadow && $row['topic_approved'] && $row['topic_type'] != POST_GLOBAL)
+			if ($leave_shadow && $row['topic_visibility'] == ITEM_APPROVED && $row['topic_type'] != POST_GLOBAL)
 			{
 				$shadow = array(
 					'forum_id'				=>	(int) $row['forum_id'],
 					'icon_id'				=>	(int) $row['icon_id'],
 					'topic_attachment'		=>	(int) $row['topic_attachment'],
-					'topic_approved'		=>	1, // a shadow topic is always approved
+					'topic_visibliity'		=>	ITEM_APPROVED, // a shadow topic is always approved
 					'topic_reported'		=>	0, // a shadow topic is never reported
 					'topic_title'			=>	(string) $row['topic_title'],
 					'topic_poster'			=>	(int) $row['topic_poster'],
@@ -1054,7 +1057,7 @@ function mcp_fork_topic($topic_ids)
 				'forum_id'					=> (int) $to_forum_id,
 				'icon_id'					=> (int) $topic_row['icon_id'],
 				'topic_attachment'			=> (int) $topic_row['topic_attachment'],
-				'topic_approved'			=> 1,
+				'topic_visibility'			=> ITEM_APPROVED,
 				'topic_reported'			=> 0,
 				'topic_title'				=> (string) $topic_row['topic_title'],
 				'topic_poster'				=> (int) $topic_row['topic_poster'],
@@ -1131,7 +1134,7 @@ function mcp_fork_topic($topic_ids)
 					'icon_id'			=> (int) $row['icon_id'],
 					'poster_ip'			=> (string) $row['poster_ip'],
 					'post_time'			=> (int) $row['post_time'],
-					'post_approved'		=> 1,
+					'post_visibility'	=> ITEM_APPROVED,
 					'post_reported'		=> 0,
 					'enable_bbcode'		=> (int) $row['enable_bbcode'],
 					'enable_smilies'	=> (int) $row['enable_smilies'],

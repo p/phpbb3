@@ -396,7 +396,7 @@ class fulltext_native extends search_backend
 	* @param	string		$sort_dir			is either a or d representing ASC and DESC
 	* @param	string		$sort_days			specifies the maximum amount of days a post may be old
 	* @param	array		$ex_fid_ary			specifies an array of forum ids which should not be searched
-	* @param	array		$m_approve_fid_ary	specifies an array of forum ids in which the searcher is allowed to view unapproved posts
+	* @param	array		$m_approve_fid_sql	specifies which types of posts the user can view
 	* @param	int			$topic_id			is set to 0 or a topic id, if it is not 0 then only posts in this topic should be searched
 	* @param	array		$author_ary			an array of author ids if the author should be ignored during the search the array is empty
 	* @param	string		$author_name		specifies the author match, when ANONYMOUS is also a search-match
@@ -407,7 +407,7 @@ class fulltext_native extends search_backend
 	*
 	* @access	public
 	*/
-	function keyword_search($type, $fields, $terms, $sort_by_sql, $sort_key, $sort_dir, $sort_days, $ex_fid_ary, $m_approve_fid_ary, $topic_id, $author_ary, $author_name, &$id_ary, $start, $per_page)
+	function keyword_search($type, $fields, $terms, $sort_by_sql, $sort_key, $sort_dir, $sort_days, $ex_fid_ary, $m_approve_fid_sql, $topic_id, $author_ary, $author_name, &$id_ary, $start, $per_page)
 	{
 		global $config, $db;
 
@@ -437,7 +437,7 @@ class fulltext_native extends search_backend
 			$sort_key,
 			$topic_id,
 			implode(',', $ex_fid_ary),
-			implode(',', $m_approve_fid_ary),
+// @TODO			implode(',', $m_approve_fid_ary),
 			implode(',', $author_ary),
 			$author_name,
 		)));
@@ -614,7 +614,7 @@ class fulltext_native extends search_backend
 			$sql_where[] = '(' . implode(' OR ', $is_null_joins) . ')';
 		}
 
-		if (!sizeof($m_approve_fid_ary))
+/*		if (!sizeof($m_approve_fid_ary))
 		{
 			$sql_where[] = 'p.post_approved = 1';
 		}
@@ -622,6 +622,8 @@ class fulltext_native extends search_backend
 		{
 			$sql_where[] = '(p.post_approved = 1 OR ' . $db->sql_in_set('p.forum_id', $m_approve_fid_ary, true) . ')';
 		}
+*/
+		$sql_where[] = $m_approve_fid_sql;
 
 		if ($topic_id)
 		{
@@ -794,7 +796,7 @@ class fulltext_native extends search_backend
 	* @param	string		$sort_dir			is either a or d representing ASC and DESC
 	* @param	string		$sort_days			specifies the maximum amount of days a post may be old
 	* @param	array		$ex_fid_ary			specifies an array of forum ids which should not be searched
-	* @param	array		$m_approve_fid_ary	specifies an array of forum ids in which the searcher is allowed to view unapproved posts
+	* @param	array		$m_approve_fid_sql	specifies which posts a user can view, based on permissions
 	* @param	int			$topic_id			is set to 0 or a topic id, if it is not 0 then only posts in this topic should be searched
 	* @param	array		$author_ary			an array of author ids
 	* @param	string		$author_name		specifies the author match, when ANONYMOUS is also a search-match
@@ -805,7 +807,7 @@ class fulltext_native extends search_backend
 	*
 	* @access	public
 	*/
-	function author_search($type, $firstpost_only, $sort_by_sql, $sort_key, $sort_dir, $sort_days, $ex_fid_ary, $m_approve_fid_ary, $topic_id, $author_ary, $author_name, &$id_ary, $start, $per_page)
+	function author_search($type, $firstpost_only, $sort_by_sql, $sort_key, $sort_dir, $sort_days, $ex_fid_ary, $m_approve_fid_sql, $topic_id, $author_ary, $author_name, &$id_ary, $start, $per_page)
 	{
 		global $config, $db;
 
@@ -826,7 +828,7 @@ class fulltext_native extends search_backend
 			$sort_key,
 			$topic_id,
 			implode(',', $ex_fid_ary),
-			implode(',', $m_approve_fid_ary),
+// @TODO			implode(',', $m_approve_fid_ary),
 			implode(',', $author_ary),
 			$author_name,
 		)));
@@ -876,7 +878,7 @@ class fulltext_native extends search_backend
 			break;
 		}
 
-		if (!sizeof($m_approve_fid_ary))
+/*		if (!sizeof($m_approve_fid_ary))
 		{
 			$m_approve_fid_sql = ' AND p.post_approved = 1';
 		}
@@ -888,6 +890,7 @@ class fulltext_native extends search_backend
 		{
 			$m_approve_fid_sql = ' AND (p.post_approved = 1 OR ' . $db->sql_in_set('p.forum_id', $m_approve_fid_ary, true) . ')';
 		}
+*/
 
 		$select = ($type == 'posts') ? 'p.post_id' : 't.topic_id';
 		$is_mysql = false;

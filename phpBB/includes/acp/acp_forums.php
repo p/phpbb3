@@ -302,7 +302,7 @@ class acp_forums
 					$end = $start + $batch_size;
 
 					// Sync all topics in batch mode...
-					sync('topic_approved', 'range', 'topic_id BETWEEN ' . $start . ' AND ' . $end, true, false);
+					sync('topic_visibility', 'range', 'topic_id BETWEEN ' . $start . ' AND ' . $end, true, false);
 					sync('topic', 'range', 'topic_id BETWEEN ' . $start . ' AND ' . $end, true, true);
 
 					if ($end < $row2['max_topic_id'])
@@ -1647,7 +1647,7 @@ class acp_forums
 			FROM ' . POSTS_TABLE . '
 			WHERE forum_id = ' . $forum_id . '
 				AND post_postcount = 1
-				AND post_approved = 1';
+				AND post_visibility = ' . ITEM_APPROVED;
 		$result = $db->sql_query($sql);
 
 		$post_counts = array();
@@ -1785,7 +1785,7 @@ class acp_forums
 		// Make sure the overall post/topic count is correct...
 		$sql = 'SELECT COUNT(post_id) AS stat
 			FROM ' . POSTS_TABLE . '
-			WHERE post_approved = 1';
+			WHERE post_visibility = ' . ITEM_APPROVED;
 		$result = $db->sql_query($sql);
 		$row = $db->sql_fetchrow($result);
 		$db->sql_freeresult($result);
@@ -1794,7 +1794,7 @@ class acp_forums
 
 		$sql = 'SELECT COUNT(topic_id) AS stat
 			FROM ' . TOPICS_TABLE . '
-			WHERE topic_approved = 1';
+			WHERE topic_visibility = ' . ITEM_APPROVED;
 		$result = $db->sql_query($sql);
 		$row = $db->sql_fetchrow($result);
 		$db->sql_freeresult($result);
