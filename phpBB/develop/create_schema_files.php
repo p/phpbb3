@@ -12,7 +12,7 @@
 * If you overwrite the original schema files please make sure you save the file with UNIX linefeeds.
 */
 
-//die("Please read the first lines of this script for instructions on how to enable it");
+die("Please read the first lines of this script for instructions on how to enable it");
 
 @set_time_limit(0);
 
@@ -242,7 +242,7 @@ $supported_dbms = array('firebird', 'mssql', 'mysql_40', 'mysql_41', 'oracle', '
 
 foreach ($supported_dbms as $dbms)
 {
-	$fp = fopen($schema_path . '' . $dbms . '_schema.sql', 'wt');
+	$fp = fopen($schema_path . '_' . $dbms . '_schema.sql', 'wt');
 
 	$line = '';
 
