@@ -16,7 +16,6 @@ if (!defined('IN_PHPBB'))
 	exit;
 }
 
-
 /**
  * A stack based BBCode parser.
  *
@@ -42,7 +41,6 @@ abstract class phpbb_bbcode_parser_base
 	 * 		'attributes' => array(
 	 * 			'attributeName' => array(
 	 * 				'replace' => 'Attribute replacement. Use string defined in self::$attr_value_replace as a replacement for the attributes value',
-	 * 				'type_check' => 'function_name', // Optional. Function name to check if the value of the attribute is allowed. It must return bool or a corrected string. It must accept the attribute value string.
 	 * 				'required' => true, // Optional. The attribute must be set and not empty for the tag to be parsed.
 	 * 			),
 	 * 			// ...
@@ -52,10 +50,13 @@ abstract class phpbb_bbcode_parser_base
 	 * 			'tag2' => true,
 	 * 			// ...
 	 * 		),
-	*		'children_func' => 'function_name', // Decide which children to allow based on the attributes that are present.
+	 * 		// Optional
+	 *		'children_func' => 'function_name', // Decide which children to allow based on the attributes that are present.
 	 * 		'parents' => array(true), // Same as 'children'.
 	 * 		// Optional
 	 * 		'content_func' => 'function_name', // Applies function to the contents of the tag and replaces it with the output. Used only when the tag does not allow children. It must return the replacement string and accept the input string. This is not like HTML...
+	 * 		// Optional
+	 * 		'attribute_check' => 'function_name', // Validates attributes (if you want to change attributes pass the attributes array by reference and return true)
 	 * 	),
 	 * 	'tag2' => array(
 	 * // ...
@@ -98,14 +99,14 @@ abstract class phpbb_bbcode_parser_base
 	 *
 	 * @var string
 	 */
-	private $tag_regex = '~\[(/?)(\*|[a-z][a-z0-9]*)(?:=(\'[^\']*\'|"[^"]*"|[^ \]]*))?((?: [a-z]+(?:\s?=\s?(?:\'[^\']*\'|"[^"]*"|[^ \]]*))?)*)\]~i';
+	private $tag_regex = '~\[(/?)(\*|[a-z][a-z0-9]*)(?:=(\'[^\']*\'|&quot;(?:.(?!&quot;))*.?&quot;|[^ \]]*))?((?: [a-z]+(?:\s?=\s?(?:\'[^\']*\'|"[^"]*"|[^ \]]*))?)*)\]~i';
 
 	/**
 	 * Regex to match attribute&value pairs.
 	 *
 	 * @var string
 	 */
-	private $attribute_regex = '~([a-z]+)(?:\s?=\s?((?:\'[^\']*?\'|"[^"]*?")))?~i';
+	private $attribute_regex = '~([a-z]+)(?:\s?=\s?((?:\'[^\']*?\'|&quot;(?:.(?!&quot;))*.?&quot;)))?~i';
 
 	/**
 	 * Delimiter's ASCII code.
@@ -141,7 +142,7 @@ abstract class phpbb_bbcode_parser_base
 	 *
 	 * @var string
 	 */
-	private $local_url;
+	protected $local_url;
 
 	/**
 	 * Total number of smilies
@@ -625,19 +626,6 @@ abstract class phpbb_bbcode_parser_base
 					}
 					$this->stack[0]['attributes'] = $tag_data[2];
 		
-					// Handle the (opening) tag with a custom function
-					if (isset($tag_definition['replace_func']))
-					{
-						
-						$string[$i] = call_user_func($tag_definition['replace_func'], $tag_data[2], $tag_definition);
-		
-						if (isset($tag_definition['content_func']) && $tag_definition['children'][0] === false && sizeof($tag_definition['children']) == 1)
-						{
-							$string[$i + 1] = call_user_func($tag_definition['content_func'], $string[$i + 1]);
-						}
-						break;
-					}
-		
 					// New code for the feature I've always wanted to implement :)
 					if (isset($tag_definition['attributes']['__']) && $tag_definition['children'][0] == false && sizeof($tag_definition['children']) == 1)
 					{
@@ -649,6 +637,19 @@ abstract class phpbb_bbcode_parser_base
 					{
 						$attributes = array();
 						$replacements = array();
+					}
+		
+					// Handle the (opening) tag with a custom function
+					if (isset($tag_definition['replace_func']))
+					{
+						
+						$string[$i] = call_user_func($tag_definition['replace_func'], $tag_data[2], $tag_definition);
+		
+						if (isset($tag_definition['content_func']) && $tag_definition['children'][0] === false && sizeof($tag_definition['children']) == 1)
+						{
+							$string[$i + 1] = call_user_func($tag_definition['content_func'], $string[$i + 1]);
+						}
+						break;
 					}
 		
 					foreach ($tag_definition['attributes'] as $attribute => $value)
@@ -731,8 +732,14 @@ abstract class phpbb_bbcode_parser_base
 		
 			if (strlen($matches[self::MATCH_SHORT_ARG]) != 0 && isset($tag_attributes['_']))
 			{
+				// Validate short attribute.
+				$value = preg_replace('#^(&quot;|\')(.*)\1$#', '$2', $matches[self::MATCH_SHORT_ARG]);
+
 				// Add short attribute.
-				$attributes = array('_' => preg_replace('#^(["\'])(.*)\1$#', '$2', $matches[self::MATCH_SHORT_ARG]));
+				if (isset($value))
+				{
+					$attributes = array('_' => $value);
+				}
 			}
 			else if (strlen($matches[self::MATCH_ARGS]) == 0 || (sizeof($tag_attributes)) == 0)
 			{
@@ -744,9 +751,15 @@ abstract class phpbb_bbcode_parser_base
 				}
 				else
 				{
-					$tag = array(self::TYPE_TAG_SIMPLE, $matches[self::MATCH_TAG_NAME]);
+					$tag = array(-1 => $matches[0], self::TYPE_TAG_SIMPLE, $matches[self::MATCH_TAG_NAME]);
 					if (isset($attributes))
 					{
+						$child_attribute = isset($this->tags[$this->stack[0]]['attributes']['__']) && $this->tags[$this->stack[0]]['children'][0] == false && sizeof($this->tags[$this->stack[0]]['children']) == 1;
+						if (isset($this->tags[$matches[self::MATCH_TAG_NAME]]['attribute_check']) && !$child_attribute && !call_user_func($this->tags[$matches[self::MATCH_TAG_NAME]]['attribute_check'], $attributes))
+						{
+							return $matches[0];
+						}
+
 						$tag[] = $attributes;
 					}
 					return $this->add_tag($tag);
@@ -773,25 +786,8 @@ abstract class phpbb_bbcode_parser_base
 				if (isset($tag_attribs_matched))
 				{
 					// The attribute exists within the defined tag. Undefined tags are removed.
-					$attr_value = preg_replace('#^(["\'])(.*)\1$#', '$2', $value[self::MATCH_ARG_VALUE]);
+					$attr_value = preg_replace('#^(&quot;|\')(.*)\1$#', '$2', $value[self::MATCH_ARG_VALUE]);
 
-					if (isset($tag_attribs_matched['type_check']))
-					{
-						// A type check is needed for this attribute.
-
-						$type_check = $tag_attribs_matched['type_check']($attr_value);
-
-						if (!is_bool($type_check))
-						{
-							// The type check function decided to fix the input instead of returning false.
-							$attr_value = $type_check;
-						}
-						else if ($type_check === false)
-						{
-							// Type check has failed.
-							continue;
-						}
-					}
 					if (isset($tag_attribs_matched['required']) && strlen($attr_value) == 0)
 					{
 						// A required attribute is empty. This is done after the type check as the type check may return an empty value.
@@ -800,6 +796,9 @@ abstract class phpbb_bbcode_parser_base
 					$attributes[$value[self::MATCH_ARG_NAME]] = $attr_value;
 				}
 			}
+
+			// Even in [url][/url] there's a __ parameter - it's just equal to the empty string
+			$attributes['__'] = true;
 		
 			// Check all attributes, which were not used, if they are required.
 			if ($this->has_required($matches[self::MATCH_TAG_NAME], array_values(array_diff(array_keys($tag_attributes), array_keys($attributes)))))
@@ -808,12 +807,20 @@ abstract class phpbb_bbcode_parser_base
 				return $matches[0];
 			}
 
+			unset($attributes['__']);
+
 			if (sizeof($attributes))
 			{
-				return $this->add_tag(array(self::TYPE_TAG, $matches[self::MATCH_TAG_NAME], $attributes));
+				$child_attribute = isset($this->tags[$this->stack[0]]['attributes']['__']) && $this->tags[$this->stack[0]]['children'][0] == false && sizeof($this->tags[$this->stack[0]]['children']) == 1;
+				if (isset($this->tags[$matches[self::MATCH_TAG_NAME]]['attribute_check']) && !$child_attribute && !call_user_func($this->tags[$matches[self::MATCH_TAG_NAME]]['attribute_check'], $attributes))
+				{
+					return $matches[0];
+				}
+
+				return $this->add_tag(array(-1 => $matches[0], self::TYPE_TAG, $matches[self::MATCH_TAG_NAME], $attributes));
 			}
 
-			return $this->add_tag(array(self::TYPE_TAG_SIMPLE, $matches[self::MATCH_TAG_NAME]));
+			return $this->add_tag(array(-1 => $matches[0], self::TYPE_TAG_SIMPLE, $matches[self::MATCH_TAG_NAME]));
 		}
 		// If tag is a closing tag.
 				
@@ -840,9 +847,34 @@ abstract class phpbb_bbcode_parser_base
 		}
 		else if (!isset($this->tags[$matches[self::MATCH_TAG_NAME]]['close_shadow']))
 		{
+			$child_attribute = isset($this->tags[$this->stack[0]]['attributes']['__']) && $this->tags[$this->stack[0]]['children'][0] == false && sizeof($this->tags[$this->stack[0]]['children']) == 1;
+			if (isset($this->tags[$matches[self::MATCH_TAG_NAME]]['attribute_check']) && $child_attribute)
+			{
+				$tag = $this->parsed[$this->parse_pos - 2];
+				$attributes = isset($tag[2]) ? array_merge($tag[2], array('__' => $this->parsed[$this->parse_pos - 1])) : array('__' => $this->parsed[$this->parse_pos - 1]);
+				if (!call_user_func($this->tags[$this->stack[0]]['attribute_check'], $attributes))
+				{
+					array_shift($this->stack);
+					$this->parsed[$this->parse_pos - 3] .= $this->decompile_tag($tag);
+					$string = array_pop($this->parsed) . $matches[0];
+					array_pop($this->parsed);
+					$bbcode = clone $this;
+					$string = unserialize($bbcode->first_pass($string));
+					if (empty($string))
+					{
+						return '';
+					}
+					$this->parsed[$this->parse_pos - 3] .= array_shift($string);
+					array_pop($string);
+					$this->parsed = array_merge($this->parsed, $string);
+					$this->parse_pos -= sizeof($string) + 2;
+					return $this->delimiter;
+				}	
+			}
+
 			// A unset() was elicting many notices here.
 			array_shift($this->stack);
-			$this->parsed[$this->parse_pos] = array(self::TYPE_CTAG, $matches[self::MATCH_TAG_NAME]);
+			$this->parsed[$this->parse_pos] = array(-1 => $matches[0], self::TYPE_CTAG, $matches[self::MATCH_TAG_NAME]);
 			$this->parse_pos += 2;
 			return $this->delimiter;
 		}
@@ -971,7 +1003,7 @@ abstract class phpbb_bbcode_parser_base
 
 		$this->num_urls++;
 
-		$this->parsed[$this->parse_pos] = array(self::TYPE_ABSTRACT_LOCAL, $matches[1]);
+		$this->parsed[$this->parse_pos] = array(self::TYPE_ABSTRACT_LOCAL, $matches[1], $matches[0]);
 		$this->parse_pos += 2;
 		return $this->delimiter;
 	}
@@ -1046,25 +1078,7 @@ abstract class phpbb_bbcode_parser_base
 			case self::TYPE_ABSTRACT_LOCAL:
 				return $this->local_url . '/' . $tag[1];
 			default:
-				$ret = '[' . (($tag[0] == self::TYPE_CTAG) ? '/' : '');
-				$ret .= $tag[1];
-		
-				if(isset($tag[2]))
-				{
-					if (isset($tag[2]['_']))
-					{
-						$ret .= '="' . $tag[2]['_'] . '"';
-						unset($tag[2]['_']);
-					}
-	
-					foreach ($tag[2] as $attribute => $value)
-					{
-						$ret .= ' ' . $attribute . '="' . $value . '"';
-					}
-				}
-				$ret .= ']';
-
-				return $ret;
+				return $tag[-1];
 		}
 	}
 

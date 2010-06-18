@@ -25,6 +25,8 @@ class phpbb_bbcode_parser extends phpbb_bbcode_parser_base
 	private $list_stack = array();
 	private $php_code = false;
 	protected $tags = array();
+	public $warn_msg = array();
+	public $mode = false;
 
 	public function __construct()
 	{
@@ -129,15 +131,36 @@ class phpbb_bbcode_parser extends phpbb_bbcode_parser_base
 				'attributes' => array(
 					// The replace value is not important empty because the replace_func handles this.
 					'_' => array(
-						'replace' => '',
+						'replace' => ''
 					),
 					'__' => array(
-						'replace' => '',
+						'replace' => ''
 					),
 				),
 				// If the _ attribute is used the value corresponding to 'children' will be changed to array(true, array('url' => true)).
 				'children_func' => array($this, 'url_children'),
 				'parents' => array(true),
+				'attribute_check' => array($this, 'url_check'),
+
+			),
+
+			'email' => array(
+				'replace' => '',
+				'replace_func' => array($this, 'email_tag'),
+				'close' => '</a>',
+				'attributes' => array(
+					// The replace value is not important empty because the replace_func handles this.
+					'_' => array(
+						'replace' => ''
+					),
+					'__' => array(
+						'replace' => ''
+					),
+				),
+				// If the _ attribute is used the value corresponding to 'children' will be changed to array(true, array('url' => true)).
+				'children_func' => array($this, 'email_children'),
+				'parents' => array(true),
+				'attribute_check' => array($this, 'email_check'),
 
 			),
 
@@ -160,41 +183,34 @@ class phpbb_bbcode_parser extends phpbb_bbcode_parser_base
 				'attributes' => array(
 					'_' => array(
 						'replace' => '%s',
-						'required' => true,
-						'type_check' => 'ctype_digit'
+						'required' => true
 					),
 				),
 				'children' => array(true, 'size' => true),
 				'parents' => array(true),
+				'attribute_check' => array($this, 'size_check'),
 			),
-
 
 			// FLASH tag implementation attempt.
 			'flash' => array(
-				'replace' => '<object classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540000" codebase="http://download.macromedia.com/pub/shockwave/cabs/flash/swflash.cab#version=7,0,19,0"{w}{h}>
-<param name="movie" value="{m}" />
-<param name="quality" value="high" />
-<embed src="{m}" quality="high" pluginspage="http://www.macromedia.com/go/getflashplayer" type="application/x-shockwave-flash"{w}{h}>
-</embed>
-</object>',
+				'replace' => '',
+				'replace_func' => array($this, 'flash_tag'),
 				'close' => false,
 				'attributes' => array(
-					'm' => array(
-						'replace' => '%s',
+					'_' => array(
+						'replace' => '',
 						'required' => true,
 					),
-					'w' => array(
-						'replace' => ' width="%s"',
-						'type_check' => 'ctype_digit',
-					),
-					'h' => array(
-						'replace' => ' height="%s"',
-						'type_check' => 'ctype_digit',
+					'__' => array(
+						'replace' => '',
+						'required' => true,
 					),
 				),
 				'children' => array(false),
 				'parents' => array(true),
+				'attribute_check' => array($this, 'flash_check'),
 			),
+
 			// The spoiler tag from area51.phpbb.com :p
 			'spoiler' => array(
 				'replace' => '<span class="quotetitle"><b>Spoiler:</b></span><span style="background-color:white;color:white;">',
@@ -264,14 +280,125 @@ class phpbb_bbcode_parser extends phpbb_bbcode_parser_base
 		parent::__construct();
 	}
 
+	public function first_pass($string)
+	{
+		$this->warn_msg = array();
+
+		return parent::first_pass($string);
+	}
+
+ 	protected function flash_check(array $attributes)
+	{
+		global $user, $config;
+
+		$attr = $attributes['_'];
+
+		if (!preg_match('#^([0-9]+),([0-9]+)$#', $attr))
+		{
+			return false;
+		}
+
+		list($width, $height) = explode(',', $attr);
+
+		if ($width <= 0 || $height <= 0)
+		{
+			return false;
+		}
+
+		if ($config['max_' . $this->mode . '_img_height'] || $config['max_' . $this->mode . '_img_width'])
+		{
+
+			if ($config['max_' . $this->mode . '_img_height'] && $config['max_' . $this->mode . '_img_height'] < $height)
+			{
+				$this->warn_msg[] = sprintf($user->lang['MAX_FLASH_HEIGHT_EXCEEDED'], $config['max_' . $this->mode . '_img_height']);
+
+				return false;
+			}
+
+			if ($config['max_' . $this->mode . '_img_width'] && $config['max_' . $this->mode . '_img_width'] < $width)
+			{
+				$this->warn_msg[] = sprintf($user->lang['MAX_FLASH_WIDTH_EXCEEDED'], $config['max_' . $this->mode . '_img_width']);
+
+				return false;
+			}
+		}
+
+		return $this->path_not_in_domain($attributes['__']);
+	}
+
+ 	protected function flash_tag(array $attributes = array(), array $definition = array())
+	{
+		list($width, $height) = explode(',', $attributes['_']);
+		$width = " width=\"$width\"";
+		$height = " height=\"$height\"";
+
+		return '<object classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540000" codebase="http://download.macromedia.com/pub/shockwave/cabs/flash/swflash.cab#version=7,0,19,0"' . $width . $height . '>
+<param name="movie" value="' . $attributes['__'] . '" />
+<param name="quality" value="high" />
+<embed src="' . $attributes['__'] . '" quality="high" pluginspage="http://www.macromedia.com/go/getflashplayer" type="application/x-shockwave-flash"' . $width . $height . '>
+</embed>
+</object>';
+	}
+
+ 	protected function size_check(array $attributes)
+	{
+		global $user, $config;
+
+		$stx = $attributes['_'];
+
+		if (!preg_match('#^[\-\+]?\d+$#', $stx))
+		{
+			return false;
+		}
+
+		if ($config['max_' . $this->mode . '_font_size'] && $config['max_' . $this->mode . '_font_size'] < $stx)
+		{
+			$this->warn_msg[] = sprintf($user->lang['MAX_FONT_SIZE_EXCEEDED'], $config['max_' . $this->mode . '_font_size']);
+
+			return false;
+		}
+
+		// Do not allow size=0
+		if ($stx <= 0)
+		{
+			return false;
+		}
+
+		return true;
+	}
+
+	protected function url_check(array $attributes)
+	{
+		$url = isset($attributes['_']) ? $attributes['_'] : $attributes['__'];
+
+		$url = str_replace("\r\n", "\n", str_replace('\"', '"', trim($url)));
+		$url = str_replace(' ', '%20', $url);
+
+		// Checking urls
+		return preg_match('#^' . get_preg_expression('url') . '$#i', $url) ||
+			preg_match('#^' . get_preg_expression('www_url') . '$#i', $url) ||
+			preg_match('#^' . preg_quote($this->local_url, '#') . get_preg_expression('relative_url') . '$#i', $url);
+	}
 
  	protected function url_tag(array $attributes = array(), array $definition = array())
 	{
-		if (isset($attributes['_']))
+		$url = isset($attributes['_']) ? $attributes['_'] : $attributes['__'];
+
+		// if there is no scheme, then add http schema
+		if (!preg_match('#^[a-z][a-z\d+\-.]*:/{2}#i', $url))
 		{
-			return '<a href="' . $attributes['_'] . '">';
+			$url = 'http://' . $url;
 		}
-		return '<a href="' . $attributes['__'] . '">';
+
+		// Is this a link to somewhere inside this board? If so then remove the session id from the url
+		if (strpos($url, $this->local_url) !== false && strpos($url, 'sid=') !== false)
+		{
+			$url = preg_replace('/(&amp;|\?)sid=[0-9a-f]{32}&amp;/', '\1', $url);
+			$url = preg_replace('/(&amp;|\?)sid=[0-9a-f]{32}$/', '', $url);
+			$url = append_sid($url);
+		}
+
+		return '<a href="' . $url . '">';
 	}
 
 	protected function url_children(array $attributes)
@@ -279,7 +406,32 @@ class phpbb_bbcode_parser extends phpbb_bbcode_parser_base
 		$this->num_urls++;
 		if (isset($attributes['_']))
 		{
-			return array(true, 'url' => true, '__url' => true, '__smiley' => true);
+			return array(true, 'url' => true, 'email' => true, '__url' => true, '__smiley' => true);
+		}
+		return array(false);
+	}
+
+	protected function email_check(array $attributes)
+	{
+		$email = isset($attributes['_']) ? $attributes['_'] : $attributes['__'];
+
+		$email = str_replace("\r\n", "\n", str_replace('\"', '"', trim($email)));
+
+		return preg_match('/^' . get_preg_expression('email') . '$/i', $email);
+	}
+
+ 	protected function email_tag(array $attributes = array(), array $definition = array())
+	{
+		$email = isset($attributes['_']) ? $attributes['_'] : $attributes['__'];
+
+		return '<a href="mailto:' . $email . '">';
+	}
+
+	protected function email_children(array $attributes)
+	{
+		if (isset($attributes['_']))
+		{
+			return array(true, 'url' => true, 'email' => true, '__url' => true, '__smiley' => true);
 		}
 		return array(false);
 	}
@@ -387,6 +539,58 @@ class phpbb_bbcode_parser extends phpbb_bbcode_parser_base
 		}
 
 		return $code;
+	}
+
+	/**
+	* Check if url is pointing to this domain/script_path/php-file
+	*
+	* @param string $url the url to check
+	* @return false if the url is pointing to this domain/script_path/php-file, true if not
+	*
+	* @access private
+	*/
+	function path_not_in_domain($url)
+	{
+		global $config, $phpEx, $user;
+
+		if ($config['force_server_vars'])
+		{
+			$check_path = $config['script_path'];
+		}
+		else
+		{
+			$check_path = ($user->page['root_script_path'] != '/') ? substr($user->page['root_script_path'], 0, -1) : '/';
+		}
+
+		// Is the user trying to link to a php file in this domain and script path?
+		if (strpos($url, ".{$phpEx}") !== false && strpos($url, $check_path) !== false)
+		{
+			$server_name = $user->host;
+
+			// Forcing server vars is the only way to specify/override the protocol
+			if ($config['force_server_vars'] || !$server_name)
+			{
+				$server_name = $config['server_name'];
+			}
+
+			// Check again in correct order...
+			$pos_ext = strpos($url, ".{$phpEx}");
+			$pos_path = strpos($url, $check_path);
+			$pos_domain = strpos($url, $server_name);
+
+			if ($pos_domain !== false && $pos_path >= $pos_domain && $pos_ext >= $pos_path)
+			{
+				// Ok, actually we allow linking to some files (this may be able to be extended in some way later...)
+				if (strpos($url, '/' . $check_path . '/download/file.' . $phpEx) !== false)
+				{
+					return true;
+				}
+
+				return false;
+			}
+		}
+
+		return true;
 	}
 }
 
