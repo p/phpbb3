@@ -84,7 +84,7 @@ if ($view && !$post_id)
 		$sql = 'SELECT post_id, topic_id, forum_id
 			FROM ' . POSTS_TABLE . "
 			WHERE topic_id = $topic_id
-				AND " . topic_visibility::get_visibility_sql('post', $forum_id) . "
+				AND " . phpbb_visibility::get_visibility_sql('post', $forum_id) . "
 				AND post_time > $topic_last_read
 				AND forum_id = $forum_id
 			ORDER BY post_time ASC";
@@ -138,7 +138,7 @@ if ($view && !$post_id)
 				WHERE forum_id = ' . $row['forum_id'] . "
 					AND topic_moved_id = 0
 					AND topic_last_post_time $sql_condition {$row['topic_last_post_time']}
-					AND" . topic_visibility::get_visibility_sql('topic', $row['forum_id']) . "
+					AND" . phpbb_visibility::get_visibility_sql('topic', $row['forum_id']) . "
 				ORDER BY topic_last_post_time $sql_ordering";
 			$result = $db->sql_query_limit($sql, 1);
 			$row = $db->sql_fetchrow($result);
@@ -318,7 +318,7 @@ if ($post_id)
 			FROM ' . POSTS_TABLE . ' p1, ' . POSTS_TABLE . " p2
 			WHERE p1.topic_id = {$topic_data['topic_id']}
 				AND p2.post_id = {$post_id}
-				AND " . topic_visibility::get_visibility_sql('post', $forum_id, 'p1') . '
+				AND " . phpbb_visibility::get_visibility_sql('post', $forum_id, 'p1') . '
 				AND ' . (($sort_dir == 'd') ? 'p1.post_time >= p2.post_time' : 'p1.post_time <= p2.post_time');
 
 		$result = $db->sql_query($sql);
@@ -441,7 +441,7 @@ if ($sort_days)
 		FROM ' . POSTS_TABLE . "
 		WHERE topic_id = $topic_id
 			AND post_time >= $min_post_time
-			AND " . topic_visibility::get_visibility_sql('post', $forum_id);
+			AND " . phpbb_visibility::get_visibility_sql('post', $forum_id);
 	$result = $db->sql_query($sql);
 	$total_posts = (int) $db->sql_fetchfield('num_posts');
 	$db->sql_freeresult($result);
@@ -940,7 +940,7 @@ $i = $i_total = 0;
 $sql = 'SELECT p.post_id
 	FROM ' . POSTS_TABLE . ' p' . (($join_user_sql[$sort_key]) ? ', ' . USERS_TABLE . ' u': '') . "
 	WHERE p.topic_id = $topic_id
-		AND " . topic_visibility::get_visibility_sql('post', $forum_id, 'p.') . "
+		AND " . phpbb_visibility::get_visibility_sql('post', $forum_id, 'p.') . "
 		" . (($join_user_sql[$sort_key]) ? 'AND u.user_id = p.poster_id': '') . "
 		$limit_posts_time
 	ORDER BY $sql_sort_order";

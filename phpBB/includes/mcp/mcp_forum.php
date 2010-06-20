@@ -149,7 +149,7 @@ function mcp_forum_view($id, $mode, $action, $forum_info)
 	$sql = "SELECT t.topic_id
 		FROM " . TOPICS_TABLE . " t
 		WHERE t.forum_id IN($forum_id, 0)
-			" . topic_visibility::get_visibility_sql('topic', $forum_id, 't.') . "
+			" . phpbb_visibility::get_visibility_sql('topic', $forum_id, 't.') . "
 			$limit_time_sql
 		ORDER BY t.topic_type DESC, $sort_order_sql";
 	$result = $db->sql_query_limit($sql, $topics_per_page, $start);
