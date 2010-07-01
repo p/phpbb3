@@ -36,7 +36,22 @@ class phpbb_cache_driver_file extends phpbb_cache_driver_base
 	function __construct($cache_dir = null)
 	{
 		global $phpbb_root_path;
-		$this->cache_dir = !is_null($cache_dir) ? $cache_dir : $phpbb_root_path . 'cache/';
+
+		if (!is_null($cache_dir))
+		{
+			$this->cache_dir = $cache_dir;
+		}
+		else
+		{
+			if (defined('PHPBB_CACHE_DIR'))
+			{
+				$this->cache_dir = $phpbb_root_path . PHPBB_CACHE_DIR;
+			}
+			else
+			{
+				$this->cache_dir = $phpbb_root_path . 'cache/';
+			}
+		}
 	}
 
 	/**

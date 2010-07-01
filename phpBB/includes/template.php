@@ -51,12 +51,12 @@ class template
 	*/
 	function set_template()
 	{
-		global $phpbb_root_path, $user;
+		global $phpbb_root_path, $user, $cache;
 
 		if (file_exists($phpbb_root_path . 'styles/' . $user->theme['template_path'] . '/template'))
 		{
 			$this->root = $phpbb_root_path . 'styles/' . $user->theme['template_path'] . '/template';
-			$this->cachepath = $phpbb_root_path . 'cache/tpl_' . str_replace('_', '-', $user->theme['template_path']) . '_';
+			$this->cachepath = $cache->cache_dir . 'tpl_' . str_replace('_', '-', $user->theme['template_path']) . '_';
 
 			if ($this->orig_tpl_storedb === null)
 			{
@@ -92,7 +92,7 @@ class template
 	*/
 	function set_custom_template($template_path, $template_name, $fallback_template_path = false)
 	{
-		global $phpbb_root_path, $user;
+		global $phpbb_root_path, $user, $cache;
 
 		// Make sure $template_path has no ending slash
 		if (substr($template_path, -1) == '/')
@@ -101,7 +101,7 @@ class template
 		}
 
 		$this->root = $template_path;
-		$this->cachepath = $phpbb_root_path . 'cache/ctpl_' . str_replace('_', '-', $template_name) . '_';
+		$this->cachepath = $cache->cache_dir . 'ctpl_' . str_replace('_', '-', $template_name) . '_';
 
 		if ($fallback_template_path !== false)
 		{

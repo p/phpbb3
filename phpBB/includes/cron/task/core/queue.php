@@ -47,8 +47,8 @@ class phpbb_cron_task_core_queue extends phpbb_cron_task_base
 	*/
 	public function is_runnable()
 	{
-		global $phpbb_root_path, $phpEx;
-		return file_exists($phpbb_root_path . 'cache/queue.' . $phpEx);
+		global $cache, $phpEx;
+		return file_exists($cache->cache_dir . 'queue.' . $phpEx);
 	}
 
 	/**

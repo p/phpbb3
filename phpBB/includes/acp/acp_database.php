@@ -188,7 +188,8 @@ class acp_database
 						unset($tables);
 
 						$template->assign_vars(array(
-							'U_ACTION'	=> $this->u_action . '&amp;action=download'
+							'U_ACTION'	=> $this->u_action . '&amp;action=download',
+							'L_ACP_BACKUP_EXPLAIN'  => sprintf($user->lang['ACP_BACKUP_EXPLAIN'], $config['store_dir']),
 						));
 
 						$available_methods = array('gzip' => 'zlib', 'bzip2' => 'bz2');
@@ -227,7 +228,7 @@ class acp_database
 							trigger_error($user->lang['BACKUP_INVALID'] . adm_back_link($this->u_action), E_USER_WARNING);
 						}
 
-						$file_name = $phpbb_root_path . 'store/' . $matches[0];
+						$file_name = $phpbb_root_path . $config['store_dir'] . $matches[0];
 
 						if (!file_exists($file_name) || !is_readable($file_name))
 						{
@@ -425,7 +426,7 @@ class acp_database
 							$methods[] = $type;
 						}
 
-						$dir = $phpbb_root_path . 'store/';
+						$dir = $phpbb_root_path . $config['store_dir'];
 						$dh = @opendir($dir);
 
 						$backup_files = array();
@@ -460,7 +461,8 @@ class acp_database
 						}
 
 						$template->assign_vars(array(
-							'U_ACTION'	=> $this->u_action . '&amp;action=submit'
+							'U_ACTION'	=> $this->u_action . '&amp;action=submit',
+							'L_RESTORE_EXPLAIN' => sprintf($user->lang['ACP_RESTORE_EXPLAIN'], $config['store_path']),
 						));
 					break;
 				}
@@ -544,8 +546,8 @@ class base_extractor
 
 		if ($store == true)
 		{
-			global $phpbb_root_path;
-			$file = $phpbb_root_path . 'store/' . $filename . $ext;
+			global $phpbb_root_path, $config;
+			$file = $phpbb_root_path . $config['store_dir'] . $filename . $ext;
 
 			$this->fp = $open($file, 'w');
 

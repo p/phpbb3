@@ -22,11 +22,23 @@ if (!defined('IN_PHPBB'))
 */
 class phpbb_cache_driver_null extends phpbb_cache_driver_base
 {
+	public $cache_path = '';
+
 	/**
 	* Set cache path
 	*/
 	function __construct()
 	{
+		global $phpbb_root_path;
+
+		if (defined('PHPBB_CACHE_DIR'))
+		{
+			$this->cache_dir = $phpbb_root_path . PHPBB_CACHE_DIR;
+		}
+		else
+		{
+			$this->cache_dir = $phpbb_root_path . 'cache/';
+		}
 	}
 
 	/**

@@ -284,7 +284,7 @@ class acp_language
 
 					foreach ($mkdir_ary as $dir)
 					{
-						$dir = $phpbb_root_path . 'store/' . $dir;
+						$dir = $phpbb_root_path . $config['store_dir'] . $dir;
 
 						if (!is_dir($dir))
 						{
@@ -413,7 +413,7 @@ class acp_language
 					}
 
 					$transfer->rename($lang_path . $file, $lang_path . $file . '.bak');
-					$result = $transfer->copy_file('store/' . $lang_path . $file, $lang_path . $file);
+					$result = $transfer->copy_file($config['store_dir'] . $lang_path . $file, $lang_path . $file);
 
 					if ($result === false)
 					{
@@ -427,9 +427,9 @@ class acp_language
 					$transfer->close_session();
 
 					// Remove from storage folder
-					if (file_exists($phpbb_root_path . 'store/' . $lang_path . $file))
+					if (file_exists($phpbb_root_path . $config['store_dir'] . $lang_path . $file))
 					{
-						@unlink($phpbb_root_path . 'store/' . $lang_path . $file);
+						@unlink($phpbb_root_path . $config['store_dir'] . $lang_path . $file);
 					}
 
 					add_log('admin', 'LOG_LANGUAGE_FILE_REPLACED', $file);
@@ -1026,11 +1026,11 @@ class acp_language
 
 				if ($use_method == '.zip')
 				{
-					$compress = new compress_zip('w', $phpbb_root_path . 'store/lang_' . $row['lang_iso'] . $use_method);
+					$compress = new compress_zip('w', $phpbb_root_path . $config['store_dir'] . 'lang_' . $row['lang_iso'] . $use_method);
 				}
 				else
 				{
-					$compress = new compress_tar('w', $phpbb_root_path . 'store/lang_' . $row['lang_iso'] . $use_method, $use_method);
+					$compress = new compress_tar('w', $phpbb_root_path . $config['store_dir'] . 'lang_' . $row['lang_iso'] . $use_method, $use_method);
 				}
 
 				// Get email templates
@@ -1083,7 +1083,7 @@ class acp_language
 				$compress->close();
 
 				$compress->download('lang_' . $row['lang_iso']);
-				@unlink($phpbb_root_path . 'store/lang_' . $row['lang_iso'] . $use_method);
+				@unlink($phpbb_root_path . $config['store_dir'] . 'lang_' . $row['lang_iso'] . $use_method);
 
 				exit;
 
@@ -1240,13 +1240,14 @@ $lang = array_merge($lang, array(
 	*/
 	function get_filename($lang_iso, $directory, $filename, $check_store = false, $only_return_filename = false)
 	{
-		global $phpbb_root_path, $safe_mode;
+		global $phpbb_root_path, $safe_mode, $config;
 
 		$check_filename = "language/$lang_iso/" . (($directory) ? $directory . '/' : '') . $filename;
 
 		if ($check_store)
 		{
-			$check_store_filename = ($safe_mode) ? "store/langfile_{$lang_iso}" . (($directory) ? '_' . $directory : '') . "_{$filename}" : "store/language/$lang_iso/" . (($directory) ? $directory . '/' : '') . $filename;
+			$check_store_filename = $config['store_dir'];
+			$check_store_filename .= ($safe_mode) ? "langfile_{$lang_iso}" . (($directory) ? '_' . $directory : '') . "_{$filename}" : "language/$lang_iso/" . (($directory) ? $directory . '/' : '') . $filename;
 
 			if (!$only_return_filename && file_exists($phpbb_root_path . $check_store_filename))
 			{

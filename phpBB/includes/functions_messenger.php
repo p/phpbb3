@@ -603,10 +603,10 @@ class queue
 	*/
 	function queue()
 	{
-		global $phpEx, $phpbb_root_path;
+		global $phpEx, $phpbb_root_path, $cache;
 
 		$this->data = array();
-		$this->cache_file = "{$phpbb_root_path}cache/queue.$phpEx";
+		$this->cache_file = $cache->cache_dir . "queue.$phpEx";
 
 		// Determine EOL character (\n for UNIX, \r\n for Windows and \r for Mac)
 		$this->eol = (!defined('PHP_EOL')) ? (($eol = strtolower(substr(PHP_OS, 0, 3))) == 'win') ? "\r\n" : (($eol == 'mac') ? "\r" : "\n") : PHP_EOL;

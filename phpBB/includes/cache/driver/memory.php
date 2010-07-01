@@ -38,7 +38,15 @@ class phpbb_cache_driver_memory extends phpbb_cache_driver_base
 	{
 		global $phpbb_root_path, $dbname, $table_prefix;
 
-		$this->cache_dir	= $phpbb_root_path . 'cache/';
+		if (defined('PHPBB_CACHE_DIR'))
+		{
+			$this->cache_dir = $phpbb_root_path . PHPBB_CACHE_DIR;
+		}
+		else
+		{
+			$this->cache_dir = $phpbb_root_path . 'cache/';
+		}
+
 		$this->key_prefix	= substr(md5($dbname . $table_prefix), 0, 8) . '_';
 
 		if (!isset($this->extension) || !extension_loaded($this->extension))

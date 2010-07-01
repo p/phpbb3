@@ -38,13 +38,13 @@ class transfer
 	*/
 	function transfer()
 	{
-		global $phpbb_root_path;
+		global $phpbb_root_path, $config;
 
 		$this->file_perms	= 0644;
 		$this->dir_perms	= 0777;
 
 		// We use the store directory as temporary path to circumvent open basedir restrictions
-		$this->tmp_path = $phpbb_root_path . 'store/';
+		$this->tmp_path = $phpbb_root_path . $config['store_dir'];
 	}
 
 	/**

@@ -970,7 +970,7 @@ parse_css_file = {PARSE_CSS_FILE}
 		// Someone wants to see the cached source ... so we'll highlight it,
 		// add line numbers and indent it appropriately. This could be nasty
 		// on larger source files ...
-		if ($source && file_exists("{$phpbb_root_path}cache/{$cache_prefix}_$source.html.$phpEx"))
+		if ($source && file_exists($cache->cache_dir . "{$cache_prefix}_$source.html.$phpEx"))
 		{
 			adm_page_header($user->lang['TEMPLATE_CACHE']);
 
@@ -982,7 +982,7 @@ parse_css_file = {PARSE_CSS_FILE}
 				'FILENAME'	=> str_replace('.', '/', $source) . '.html')
 			);
 
-			$code = str_replace(array("\r\n", "\r"), array("\n", "\n"), file_get_contents("{$phpbb_root_path}cache/{$cache_prefix}_$source.html.$phpEx"));
+			$code = str_replace(array("\r\n", "\r"), array("\n", "\n"), file_get_contents($cache->cache_dir . "{$cache_prefix}_$source.html.$phpEx"));
 
 			$conf = array('highlight.bg', 'highlight.comment', 'highlight.default', 'highlight.html', 'highlight.keyword', 'highlight.string');
 			foreach ($conf as $ini_var)
@@ -1057,7 +1057,7 @@ parse_css_file = {PARSE_CSS_FILE}
 
 			$filename = "{$cache_prefix}_$file.html.$phpEx";
 
-			if (!file_exists("{$phpbb_root_path}cache/$filename"))
+			if (!file_exists($cache->cache_dir . $filename))
 			{
 				continue;
 			}
@@ -1094,10 +1094,10 @@ parse_css_file = {PARSE_CSS_FILE}
 			$template->assign_block_vars('file', array(
 				'U_VIEWSOURCE'	=> $this->u_action . "&amp;action=cache&amp;id=$template_id&amp;source=$file",
 
-				'CACHED'		=> $user->format_date(filemtime("{$phpbb_root_path}cache/$filename")),
+				'CACHED'		=> $user->format_date(filemtime($cache->cache_dir . $filename)),
 				'FILENAME'		=> $file,
 				'FILENAME_PATH'	=> $file_tpl,
-				'FILESIZE'		=> get_formatted_filesize(filesize("{$phpbb_root_path}cache/$filename")),
+				'FILESIZE'		=> get_formatted_filesize(filesize($cache->cache_dir . $filename)),
 				'MODIFIED'		=> $user->format_date((!$template_row['template_storedb']) ? filemtime($file_tpl) : $filemtime[$file . '.html']))
 			);
 		}
@@ -2247,11 +2247,11 @@ parse_css_file = {PARSE_CSS_FILE}
 
 				if ($format == 'zip')
 				{
-					$compress = new compress_zip('w', $phpbb_root_path . "store/$path$ext");
+					$compress = new compress_zip('w', $phpbb_root_path . $config['store_dir'] . $path . $ext);
 				}
 				else
 				{
-					$compress = new compress_tar('w', $phpbb_root_path . "store/$path$ext", $ext);
+					$compress = new compress_tar('w', $phpbb_root_path . $config['store_dir'] . $path. $ext, $ext);
 				}
 
 				if (sizeof($files))
@@ -2277,11 +2277,11 @@ parse_css_file = {PARSE_CSS_FILE}
 				if (!$store)
 				{
 					$compress->download($path);
-					@unlink("{$phpbb_root_path}store/$path$ext");
+					@unlink($phpbb_root_path . $config['store_dir'] . $path . $ext);
 					exit;
 				}
 
-				trigger_error(sprintf($user->lang[$l_prefix . '_EXPORTED'], "store/$path$ext") . adm_back_link($this->u_action));
+				trigger_error(sprintf($user->lang[$l_prefix . '_EXPORTED'], $config['store_dir'] . "$path$ext") . adm_back_link($this->u_action));
 			}
 		}
 
@@ -2309,6 +2309,8 @@ parse_css_file = {PARSE_CSS_FILE}
 			'S_EXPORT'		=> true,
 			'S_ERROR_MSG'	=> (sizeof($error)) ? true : false,
 			'S_STYLE'		=> ($mode == 'style') ? true : false,
+
+			'L_DOWNLOAD_STORE_EXPLAIN'  => sprintf($user->lang['DOWNLOAD_STORE_EXPLAIN'], $config['store_dir']),
 
 			'L_TITLE'		=> $user->lang[$this->page_title],
 			'L_EXPLAIN'		=> $user->lang[$this->page_title . '_EXPLAIN'],
@@ -2809,7 +2811,7 @@ parse_css_file = {PARSE_CSS_FILE}
 	*/
 	function template_cache_filelist($template_path)
 	{
-		global $phpbb_root_path, $phpEx, $user;
+		global $phpbb_root_path, $phpEx, $user, $cache;
 
 		$cache_prefix = 'tpl_' . str_replace('_', '-', $template_path);
 
@@ -2826,7 +2828,7 @@ parse_css_file = {PARSE_CSS_FILE}
 				continue;
 			}
 
-			if (is_file($phpbb_root_path . 'cache/' . $file) && (strpos($file, $cache_prefix) === 0))
+			if (is_file($cache->cache_dir . $file) && (strpos($file, $cache_prefix) === 0))
 			{
 				$file_ary[] = str_replace('.', '/', preg_replace('#^' . preg_quote($cache_prefix, '#') . '_(.*?)\.html\.' . $phpEx . '$#i', '\1', $file));
 			}
@@ -2845,7 +2847,7 @@ parse_css_file = {PARSE_CSS_FILE}
 	*/
 	function clear_template_cache($template_row, $file_ary = false)
 	{
-		global $phpbb_root_path, $phpEx, $user;
+		global $phpbb_root_path, $phpEx, $user, $cache;
 
 		$cache_prefix = 'tpl_' . str_replace('_', '-', $template_row['template_path']);
 
@@ -2863,7 +2865,7 @@ parse_css_file = {PARSE_CSS_FILE}
 		{
 			$file = str_replace('/', '.', $file);
 
-			$file = "{$phpbb_root_path}cache/{$cache_prefix}_$file.html.$phpEx";
+			$file = $cache->cache_dir . "{$cache_prefix}_$file.html.$phpEx";
 			if (file_exists($file) && is_file($file))
 			{
 				@unlink($file);

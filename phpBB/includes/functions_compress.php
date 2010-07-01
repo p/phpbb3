@@ -462,7 +462,7 @@ class compress_zip extends compress
 	*/
 	function download($filename, $download_name = false)
 	{
-		global $phpbb_root_path;
+		global $phpbb_root_path, $config;
 
 		if ($download_name === false)
 		{
@@ -475,7 +475,7 @@ class compress_zip extends compress
 		header("Content-Type: $mimetype; name=\"$download_name.zip\"");
 		header("Content-disposition: attachment; filename=$download_name.zip");
 
-		$fp = @fopen("{$phpbb_root_path}store/$filename.zip", 'rb');
+		$fp = @fopen("{$phpbb_root_path}{$config['store_dir']}$filename.zip", 'rb');
 		if ($fp)
 		{
 			while ($buffer = fread($fp, 1024))
@@ -694,7 +694,7 @@ class compress_tar extends compress
 	*/
 	function download($filename, $download_name = false)
 	{
-		global $phpbb_root_path;
+		global $phpbb_root_path, $config;
 
 		if ($download_name === false)
 		{
@@ -724,7 +724,7 @@ class compress_tar extends compress
 		header("Content-Type: $mimetype; name=\"$download_name$this->type\"");
 		header("Content-disposition: attachment; filename=$download_name$this->type");
 
-		$fp = @fopen("{$phpbb_root_path}store/$filename$this->type", 'rb');
+		$fp = @fopen("{$phpbb_root_path}{$config['store_dir']}$filename$this->type", 'rb');
 		if ($fp)
 		{
 			while ($buffer = fread($fp, 1024))
