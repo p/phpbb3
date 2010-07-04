@@ -1607,7 +1607,7 @@ class install_install extends module
 				$row = $db->sql_fetchrow($result);
 				$db->sql_freeresult($result);
 
-				$_module->move_module_by($row, 'move_up', 5);
+				$_module->move_module_by($row, 'move_up', 8);
 			}
 
 			if ($module_class == 'ucp')
@@ -2053,7 +2053,6 @@ class install_install extends module
 			),
 			'ACP_CAT_FORUMS'		=> array(
 				'ACP_MANAGE_FORUMS',
-				'ACP_FORUM_BASED_PERMISSIONS',
 			),
 			'ACP_CAT_POSTING'		=> array(
 				'ACP_MESSAGES',
@@ -2110,16 +2109,6 @@ class install_install extends module
 				'ACP_MANAGE_USERS',
 				'ACP_GROUPS_MANAGE',
 				'ACP_MANAGE_FORUMS',
-				'ACP_MOD_LOGS',
-				'ACP_BOTS',
-				'ACP_PHP_INFO',
-			),
-			'ACP_FORUM_BASED_PERMISSIONS' => array(
-				'ACP_FORUM_PERMISSIONS',
-				'ACP_FORUM_PERMISSIONS_COPY',
-				'ACP_FORUM_MODERATORS',
-				'ACP_USERS_FORUM_PERMISSIONS',
-				'ACP_GROUPS_FORUM_PERMISSIONS',
 			),
 		),
 	);

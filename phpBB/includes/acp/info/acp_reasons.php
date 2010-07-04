@@ -19,7 +19,7 @@ class acp_reasons_info
 			'title'		=> 'ACP_REASONS',
 			'version'	=> '1.0.0',
 			'modes'		=> array(
-				'main'		=> array('title' => 'ACP_MANAGE_REASONS', 'auth' => 'acl_a_reasons', 'cat' => array('ACP_GENERAL_TASKS')),
+				'main'		=> array('title' => 'ACP_MANAGE_REASONS', 'auth' => 'acl_a_reasons', 'cat' => array('ACP_CAT_POSTING')),
 			),
 		);
 	}
