@@ -856,7 +856,7 @@ abstract class phpbb_bbcode_parser_base
 				{
 					array_shift($this->stack);
 					$this->parsed[$this->parse_pos - 3] .= $this->decompile_tag($tag);
-					$string = array_pop($this->parsed) . $matches[0];
+					$string = array_pop($this->parsed);
 					array_pop($this->parsed);
 					$bbcode = clone $this;
 					$string = unserialize($bbcode->first_pass($string));
@@ -864,11 +864,15 @@ abstract class phpbb_bbcode_parser_base
 					{
 						return '';
 					}
+
+					$this->num_smilies+= $bbcode->num_smilies;
+					$this->num_urls+= $bbcode->num_urls;
+
 					$this->parsed[$this->parse_pos - 3] .= array_shift($string);
-					array_pop($string);
 					$this->parsed = array_merge($this->parsed, $string);
-					$this->parse_pos -= sizeof($string) + 2;
-					return $this->delimiter;
+					$this->parse_pos += sizeof($string) - 2;
+
+					return $matches[0];
 				}	
 			}
 

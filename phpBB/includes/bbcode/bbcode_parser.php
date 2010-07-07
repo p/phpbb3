@@ -127,7 +127,8 @@ class phpbb_bbcode_parser extends phpbb_bbcode_parser_base
 			'url' => array(
 				'replace' => '',
 				'replace_func' => array($this, 'url_tag'),
-				'close' => '</a>',
+				'close' => '',
+				'close_func' => array($this, 'url_close'),
 				'attributes' => array(
 					// The replace value is not important empty because the replace_func handles this.
 					'_' => array(
@@ -384,6 +385,9 @@ class phpbb_bbcode_parser extends phpbb_bbcode_parser_base
 	{
 		$url = isset($attributes['_']) ? $attributes['_'] : $attributes['__'];
 
+		$url = str_replace("\r\n", "\n", str_replace('\"', '"', trim($url)));
+		$url = str_replace(' ', '%20', $url);
+
 		// if there is no scheme, then add http schema
 		if (!preg_match('#^[a-z][a-z\d+\-.]*:/{2}#i', $url))
 		{
@@ -403,12 +407,17 @@ class phpbb_bbcode_parser extends phpbb_bbcode_parser_base
 
 	protected function url_children(array $attributes)
 	{
-		$this->num_urls++;
 		if (isset($attributes['_']))
 		{
 			return array(true, 'url' => true, 'email' => true, '__url' => true, '__smiley' => true);
 		}
 		return array(false);
+	}
+
+	protected function url_close(array $attributes = array())
+	{
+		$this->num_urls++;
+		return '</a>';
 	}
 
 	protected function email_check(array $attributes)
@@ -423,6 +432,8 @@ class phpbb_bbcode_parser extends phpbb_bbcode_parser_base
  	protected function email_tag(array $attributes = array(), array $definition = array())
 	{
 		$email = isset($attributes['_']) ? $attributes['_'] : $attributes['__'];
+
+		$email = str_replace("\r\n", "\n", str_replace('\"', '"', trim($email)));
 
 		return '<a href="mailto:' . $email . '">';
 	}
