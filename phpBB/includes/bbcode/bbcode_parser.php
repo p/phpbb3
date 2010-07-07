@@ -112,15 +112,18 @@ class phpbb_bbcode_parser extends phpbb_bbcode_parser_base
 
 			// Almost exact img tag from phpBB...
 			'img' => array(
+				'replace' => '',
+				'replace_func' =>
 				'replace' => '<img alt="Image" src="',
 				'close' => '" />',
 				'attributes' => array(
 					'__' => array(
-						'replace' => '%s',
+						'replace' => '',
 					),
 				),
 				'children' => array(false),
 				'parents' => array(true),
+				'attribute_check' => array($this, 'img_check'),
 
 			),
 
@@ -306,25 +309,25 @@ class phpbb_bbcode_parser extends phpbb_bbcode_parser_base
 			return false;
 		}
 
+		$error = false;
+
 		if ($config['max_' . $this->mode . '_img_height'] || $config['max_' . $this->mode . '_img_width'])
 		{
 
 			if ($config['max_' . $this->mode . '_img_height'] && $config['max_' . $this->mode . '_img_height'] < $height)
 			{
+				$error = true;
 				$this->warn_msg[] = sprintf($user->lang['MAX_FLASH_HEIGHT_EXCEEDED'], $config['max_' . $this->mode . '_img_height']);
-
-				return false;
 			}
 
 			if ($config['max_' . $this->mode . '_img_width'] && $config['max_' . $this->mode . '_img_width'] < $width)
 			{
+				$error = true;
 				$this->warn_msg[] = sprintf($user->lang['MAX_FLASH_WIDTH_EXCEEDED'], $config['max_' . $this->mode . '_img_width']);
-
-				return false;
 			}
 		}
 
-		return $this->path_not_in_domain($attributes['__']);
+		return !$error && $this->path_not_in_domain($attributes['__']);
 	}
 
  	protected function flash_tag(array $attributes = array(), array $definition = array())
@@ -379,6 +382,54 @@ class phpbb_bbcode_parser extends phpbb_bbcode_parser_base
 		return preg_match('#^' . get_preg_expression('url') . '$#i', $url) ||
 			preg_match('#^' . get_preg_expression('www_url') . '$#i', $url) ||
 			preg_match('#^' . preg_quote($this->local_url, '#') . get_preg_expression('relative_url') . '$#i', $url);
+	}
+
+	protected function img_check(array $attributes)
+	{
+		global $user, $config;
+
+		$in = trim($attributes['__']);
+		$error = false;
+
+		$in = str_replace(' ', '%20', $in);
+
+		if (!preg_match('#^' . get_preg_expression('url') . '$#i', $in) && !preg_match('#^' . get_preg_expression('www_url') . '$#i', $in))
+		{
+			return false;
+		}
+
+		// Try to cope with a common user error... not specifying a protocol but only a subdomain
+		if (!preg_match('#^[a-z0-9]+://#i', $in))
+		{
+			$in = 'http://' . $in;
+		}
+
+		if ($config['max_' . $this->mode . '_img_height'] || $config['max_' . $this->mode . '_img_width'])
+		{
+			$stats = @getimagesize($in);
+
+			if ($stats === false)
+			{
+				$error = true;
+				$this->warn_msg[] = $user->lang['UNABLE_GET_IMAGE_SIZE'];
+			}
+			else
+			{
+				if ($config['max_' . $this->mode . '_img_height'] && $config['max_' . $this->mode . '_img_height'] < $stats[1])
+				{
+					$error = true;
+					$this->warn_msg[] = sprintf($user->lang['MAX_IMG_HEIGHT_EXCEEDED'], $config['max_' . $this->mode . '_img_height']);
+				}
+
+				if ($config['max_' . $this->mode . '_img_width'] && $config['max_' . $this->mode . '_img_width'] < $stats[0])
+				{
+					$error = true;
+					$this->warn_msg[] = sprintf($user->lang['MAX_IMG_WIDTH_EXCEEDED'], $config['max_' . $this->mode . '_img_width']);
+				}
+			}
+		}
+
+		return !$error && $this->path_not_in_domain($in);
 	}
 
  	protected function url_tag(array $attributes = array(), array $definition = array())
