@@ -35,16 +35,16 @@ class phpbb_bbcode_parser extends phpbb_bbcode_parser_base
 		$this->tags = array(
 			// The exact B BBcode from phpBB
 			'b' => array(
-				'replace' => '<span style="font-weight: bold">',
-				'close' => '</span>',
+				'replace' => '<strong>',
+				'close' => '</strong>',
 				'attributes' => array(),
 				'children' => array(true, 'quote' => true, 'code' => true, 'list' => true),
 				'parents' => array(true),
 			),
 			// The exact I BBcode from phpBB
 			'i' => array(
-				'replace' => '<span style="font-style: italic">',
-				'close' => '</span>',
+				'replace' => '<em>',
+				'close' => '</em>',
 				'attributes' => array(),
 				'children' => array(true, 'quote' => true, 'code' => true, 'list' => true),
 				'parents' => array(true),
@@ -60,8 +60,9 @@ class phpbb_bbcode_parser extends phpbb_bbcode_parser_base
 
 			// Quote tag attempt.
 			'quote' => array(
-				//'replace' => '<div class="quotetitle">{_}</div><div class="quotecontent">',
-				'close' => '</div>',
+				'replace' => '<blockquote class="uncited"><div>',
+				'replace_username' => '<blockquote><div><cite>{_} {L_WROTE}:</cite>',
+				'close' => '</div></blockquote>',
 				'attributes' => array(
 					'_' => array(
 						'replace' => '',
@@ -74,7 +75,8 @@ class phpbb_bbcode_parser extends phpbb_bbcode_parser_base
 
 			// code tag (without the =php functionality)
 			'code' => array(
-				'close' => '</div>',
+				'replace' => '<dl class="codebox"><dt>{L_CODE}: <a href="#" onclick="selectCode(this); return false;">{L_SELECT_ALL_CODE}</a></dt><dd><code>',
+				'close' => '</code></dd></dl>',
 				'replace_func' => array($this, 'code_open'),
 				'content_func' => array($this, 'code_content'),
 				'attributes' => array(
@@ -112,10 +114,8 @@ class phpbb_bbcode_parser extends phpbb_bbcode_parser_base
 
 			// Almost exact img tag from phpBB...
 			'img' => array(
-				'replace' => '',
-				'replace_func' =>
-				'replace' => '<img alt="Image" src="',
-				'close' => '" />',
+				'replace' => '<img src="{__}" alt="{L_IMAGE}" />',
+				'replace_func' => array($this, 'img_tag'),
 				'attributes' => array(
 					'__' => array(
 						'replace' => '',
@@ -128,7 +128,7 @@ class phpbb_bbcode_parser extends phpbb_bbcode_parser_base
 			),
 
 			'url' => array(
-				'replace' => '',
+				'replace' => '<a href="{_}" class="postlink">',
 				'replace_func' => array($this, 'url_tag'),
 				'close' => '',
 				'close_func' => array($this, 'url_close'),
@@ -182,7 +182,7 @@ class phpbb_bbcode_parser extends phpbb_bbcode_parser_base
 			),
 
 			'size' => array(
-				'replace' => '<span style="font-size: {_}px; line-height: normal">',
+				'replace' => '<span style="font-size: {_}px; line-height: 116%">',
 				'close' => '</span>',
 				'attributes' => array(
 					'_' => array(
@@ -432,6 +432,20 @@ class phpbb_bbcode_parser extends phpbb_bbcode_parser_base
 		return !$error && $this->path_not_in_domain($in);
 	}
 
+	protected function img_tag(array $attributes = array(), array $definition = array())
+	{
+		$in = trim($attributes['__']);
+		$in = str_replace(' ', '%20', $in);
+
+		// Try to cope with a common user error... not specifying a protocol but only a subdomain
+		if (!preg_match('#^[a-z0-9]+://#i', $in))
+		{
+			$in = 'http://' . $in;
+		}
+
+		return str_replace('{__}', $in, $definition['replace']);
+	}
+
  	protected function url_tag(array $attributes = array(), array $definition = array())
 	{
 		$url = isset($attributes['_']) ? $attributes['_'] : $attributes['__'];
@@ -453,7 +467,7 @@ class phpbb_bbcode_parser extends phpbb_bbcode_parser_base
 			$url = append_sid($url);
 		}
 
-		return '<a href="' . $url . '">';
+		return str_replace('{_}', $in, $definition['replace']);
 	}
 
 	protected function url_children(array $attributes)
@@ -516,13 +530,13 @@ class phpbb_bbcode_parser extends phpbb_bbcode_parser_base
 		return '</ul>';
 	}
 
-	protected function quote_open(array $attributes)
+	protected function quote_open(array $attributes = array(), array $definition = array())
 	{
 		static $quote_parser;
 
 		if (!isset($attributes['_']))
 		{
-			return '<div class="quotecontent">';
+			return $definition['replace'];
 		}
 
 		if (!isset($quote_parser))
@@ -532,14 +546,14 @@ class phpbb_bbcode_parser extends phpbb_bbcode_parser_base
 
 		$value = $quote_parser->second_pass($quote_parser->first_pass($attributes['_']));
 
-		return '<div class="quotetitle">' . $value . ' wrote: </div><div class="quotecontent">';
+		return str_replace('{_}', $value, $definition['replace_username']);
 	}
 
-	protected function code_open(array $attributes)
+	protected function code_open(array $attributes, array $definition = array())
 	{
 		$this->php_code = isset($attributes['_']) && strtolower($attributes['_']) == 'php';
 
-		return '<div class="codetitle"><b>Code:</b></div><div class="codecontent">';
+		return $definition['replace'];
 	}
 
 	protected function code_content($code)

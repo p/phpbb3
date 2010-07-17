@@ -1026,7 +1026,7 @@ abstract class phpbb_bbcode_parser_base
 			return $this->decompile_tag($tag);
 		}
 
-		if ($this->tags[$tag[1]]['close'] !== false || !isset($this->tags[$tag[1]]['close_shadow']))
+		if (!isset($this->tags[$tag[1]]['close_shadow']))
 		{
 			// Do not add tags to stack that do not need closing tags.
 			array_unshift($this->stack, $tag[1]);
