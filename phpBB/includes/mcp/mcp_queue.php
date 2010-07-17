@@ -327,6 +327,7 @@ class mcp_queue
 				if ($mode == 'unapproved_posts' || $mode == 'deleted_posts')
 				{
 					$visibility_const = ($mode == 'unapproved_posts') ? ITEM_UNAPPROVED : ITEM_DELETED;
+					$starter_sql = ($mode == 'unapproved_posts') ? 'AND t.topic_first_post_id <> p.post_id' : '';
 
 					$sql = 'SELECT p.post_id
 						FROM ' . POSTS_TABLE . ' p, ' . TOPICS_TABLE . ' t' . (($sort_order_sql[0] == 'u') ? ', ' . USERS_TABLE . ' u' : '') . "
@@ -335,7 +336,7 @@ class mcp_queue
 							" . (($sort_order_sql[0] == 'u') ? 'AND u.user_id = p.poster_id' : '') . '
 							' . (($topic_id) ? 'AND p.topic_id = ' . $topic_id : '') . "
 							AND t.topic_id = p.topic_id
-							AND t.topic_first_post_id <> p.post_id
+							$starter_sql
 							$limit_time_sql
 						ORDER BY $sort_order_sql";
 					$result = $db->sql_query_limit($sql, $config['topics_per_page'], $start);
@@ -467,7 +468,7 @@ class mcp_queue
 					'PAGINATION'			=> generate_pagination($this->u_action . "&amp;f=$forum_id&amp;st=$sort_days&amp;sk=$sort_key&amp;sd=$sort_dir", $total, $config['topics_per_page'], $start),
 					'PAGE_NUMBER'			=> on_page($total, $config['topics_per_page'], $start),
 					'TOPIC_ID'				=> $topic_id,
-					'TOTAL'					=> ($total == 1) ? (($mode != 'unapproved_topics') ? $user->lang['VIEW_TOPIC_POST'] : $user->lang['VIEW_FORUM_TOPIC']) : sprintf((($mode == 'unapproved_posts') ? $user->lang['VIEW_TOPIC_POSTS'] : $user->lang['VIEW_FORUM_TOPICS']), $total),
+					'TOTAL'					=> ($total == 1) ? (($mode != 'unapproved_topics') ? $user->lang['VIEW_TOPIC_POST'] : $user->lang['VIEW_FORUM_TOPIC']) : sprintf((($mode == 'unapproved_posts' || $mode == 'deleted_posts') ? $user->lang['VIEW_TOPIC_POSTS'] : $user->lang['VIEW_FORUM_TOPICS']), $total),
 				));
 
 				$this->tpl_name = 'mcp_queue';
