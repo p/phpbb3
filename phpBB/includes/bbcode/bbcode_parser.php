@@ -61,7 +61,7 @@ class phpbb_bbcode_parser extends phpbb_bbcode_parser_base
 			// Quote tag attempt.
 			'quote' => array(
 				'replace' => '<blockquote class="uncited"><div>',
-				'replace_username' => '<blockquote><div><cite>{_} {L_WROTE}:</cite>',
+				'replace_username' => '<blockquote><div><cite>{USERNAME} {L_WROTE}:</cite>',
 				'close' => '</div></blockquote>',
 				'attributes' => array(
 					'_' => array(
@@ -114,8 +114,9 @@ class phpbb_bbcode_parser extends phpbb_bbcode_parser_base
 
 			// Almost exact img tag from phpBB...
 			'img' => array(
-				'replace' => '<img src="{__}" alt="{L_IMAGE}" />',
-				'replace_func' => array($this, 'img_tag'),
+				'content_func' => array($this, 'img_tag'),
+				'replace' => '<img src="',
+				'close' => '" alt="{L_IMAGE}" />',
 				'attributes' => array(
 					'__' => array(
 						'replace' => '',
@@ -128,7 +129,7 @@ class phpbb_bbcode_parser extends phpbb_bbcode_parser_base
 			),
 
 			'url' => array(
-				'replace' => '<a href="{_}" class="postlink">',
+				'replace' => '<a href="{URL}" class="postlink">',
 				'replace_func' => array($this, 'url_tag'),
 				'close' => '',
 				'close_func' => array($this, 'url_close'),
@@ -149,7 +150,7 @@ class phpbb_bbcode_parser extends phpbb_bbcode_parser_base
 			),
 
 			'email' => array(
-				'replace' => '',
+				'replace' => '<a href="mailto:{EMAIL}">',
 				'replace_func' => array($this, 'email_tag'),
 				'close' => '</a>',
 				'attributes' => array(
@@ -197,7 +198,7 @@ class phpbb_bbcode_parser extends phpbb_bbcode_parser_base
 
 			// FLASH tag implementation attempt.
 			'flash' => array(
-				'replace' => '',
+				'replace' => '<object classid="clsid:D27CDB6E-AE6D-11CF-96B8-444553540000" codebase="http://active.macromedia.com/flash2/cabs/swflash.cab#version=5,0,0,0" width="{WIDTH}" height="{HEIGHT}"><param name="movie" value="{URL}" /><param name="play" value="false" /><param name="loop" value="false" /><param name="quality" value="high" /><param name="allowScriptAccess" value="never" /><param name="allowNetworking" value="internal" /><embed src="{URL}" type="application/x-shockwave-flash" pluginspage="http://www.macromedia.com/shockwave/download/index.cgi?P1_Prod_Version=ShockwaveFlash" width="{WIDTH}" height="{HEIGHT}" play="false" loop="false" quality="high" allowscriptaccess="never" allownetworking="internal"></embed></object>',
 				'replace_func' => array($this, 'flash_tag'),
 				'close' => false,
 				'attributes' => array(
@@ -211,18 +212,11 @@ class phpbb_bbcode_parser extends phpbb_bbcode_parser_base
 					),
 				),
 				'children' => array(false),
+				'content_func' => array($this, 'blank'),
 				'parents' => array(true),
 				'attribute_check' => array($this, 'flash_check'),
 			),
 
-			// The spoiler tag from area51.phpbb.com :p
-			'spoiler' => array(
-				'replace' => '<span class="quotetitle"><b>Spoiler:</b></span><span style="background-color:white;color:white;">',
-				'close' => '</span>',
-				'attributes' => array(),
-				'children' => array(false),
-				'parents' => array(true),
-			),
 			// a noparse tag
 			'noparse' => array(
 				'replace' => '',
@@ -275,10 +269,11 @@ class phpbb_bbcode_parser extends phpbb_bbcode_parser_base
 		}
 		$db->sql_freeresult($result);
 
-		//$this->smilies = array(
-		//	':)' => '<img src="http://area51.phpbb.com/phpBB/images/smilies/icon_e_smile.gif" />',
-		//	':(' => '<img src="http://area51.phpbb.com/phpBB/images/smilies/icon_e_sad.gif" />',
-		//);
+		foreach ($this->tags as &$tag)
+		{
+			$tag['replace'] = preg_replace('/{L_([A-Z_]+)}/e', "(!empty(\$user->lang['\$1'])) ? \$user->lang['\$1'] : ucwords(strtolower(str_replace('_', ' ', '\$1')))", $tag['replace']);
+			$tag['close'] = preg_replace('/{L_([A-Z_]+)}/e', "(!empty(\$user->lang['\$1'])) ? \$user->lang['\$1'] : ucwords(strtolower(str_replace('_', ' ', '\$1')))", $tag['close']);
+		}
 		
 //		$this->text_callback = 'strtoupper';
 		parent::__construct();
@@ -289,6 +284,11 @@ class phpbb_bbcode_parser extends phpbb_bbcode_parser_base
 		$this->warn_msg = array();
 
 		return parent::first_pass($string);
+	}
+
+	public function disable($tag)
+	{
+		unset($this->tags[$tag]);
 	}
 
  	protected function flash_check(array $attributes)
@@ -333,15 +333,8 @@ class phpbb_bbcode_parser extends phpbb_bbcode_parser_base
  	protected function flash_tag(array $attributes = array(), array $definition = array())
 	{
 		list($width, $height) = explode(',', $attributes['_']);
-		$width = " width=\"$width\"";
-		$height = " height=\"$height\"";
 
-		return '<object classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540000" codebase="http://download.macromedia.com/pub/shockwave/cabs/flash/swflash.cab#version=7,0,19,0"' . $width . $height . '>
-<param name="movie" value="' . $attributes['__'] . '" />
-<param name="quality" value="high" />
-<embed src="' . $attributes['__'] . '" quality="high" pluginspage="http://www.macromedia.com/go/getflashplayer" type="application/x-shockwave-flash"' . $width . $height . '>
-</embed>
-</object>';
+		return str_replace(array('{URL}', '{WIDTH}', '{HEIGHT}'), array($attributes['__'], $width, $height), $definition['replace']);
 	}
 
  	protected function size_check(array $attributes)
@@ -432,9 +425,9 @@ class phpbb_bbcode_parser extends phpbb_bbcode_parser_base
 		return !$error && $this->path_not_in_domain($in);
 	}
 
-	protected function img_tag(array $attributes = array(), array $definition = array())
+	protected function img_tag($in)
 	{
-		$in = trim($attributes['__']);
+		$in = trim($in);
 		$in = str_replace(' ', '%20', $in);
 
 		// Try to cope with a common user error... not specifying a protocol but only a subdomain
@@ -443,7 +436,7 @@ class phpbb_bbcode_parser extends phpbb_bbcode_parser_base
 			$in = 'http://' . $in;
 		}
 
-		return str_replace('{__}', $in, $definition['replace']);
+		return $in;
 	}
 
  	protected function url_tag(array $attributes = array(), array $definition = array())
@@ -467,7 +460,7 @@ class phpbb_bbcode_parser extends phpbb_bbcode_parser_base
 			$url = append_sid($url);
 		}
 
-		return str_replace('{_}', $in, $definition['replace']);
+		return str_replace('{URL}', $url, $definition['replace']);
 	}
 
 	protected function url_children(array $attributes)
@@ -500,7 +493,7 @@ class phpbb_bbcode_parser extends phpbb_bbcode_parser_base
 
 		$email = str_replace("\r\n", "\n", str_replace('\"', '"', trim($email)));
 
-		return '<a href="mailto:' . $email . '">';
+		return str_replace('{EMAIL}', $email, $definition['replace']);
 	}
 
 	protected function email_children(array $attributes)
@@ -533,6 +526,7 @@ class phpbb_bbcode_parser extends phpbb_bbcode_parser_base
 	protected function quote_open(array $attributes = array(), array $definition = array())
 	{
 		static $quote_parser;
+		global $user;
 
 		if (!isset($attributes['_']))
 		{
@@ -546,7 +540,9 @@ class phpbb_bbcode_parser extends phpbb_bbcode_parser_base
 
 		$value = $quote_parser->second_pass($quote_parser->first_pass($attributes['_']));
 
-		return str_replace('{_}', $value, $definition['replace_username']);
+		$definition['replace_username'] = preg_replace('/{L_([A-Z_]+)}/e', "(!empty(\$user->lang['\$1'])) ? \$user->lang['\$1'] : ucwords(strtolower(str_replace('_', ' ', '\$1')))", $definition['replace_username']);
+
+		return str_replace('{USERNAME}', $value, $definition['replace_username']);
 	}
 
 	protected function code_open(array $attributes, array $definition = array())
@@ -617,6 +613,11 @@ class phpbb_bbcode_parser extends phpbb_bbcode_parser_base
 		return $code;
 	}
 
+	protected function blank($in)
+	{
+		return '';
+	}
+
 	/**
 	* Check if url is pointing to this domain/script_path/php-file
 	*
@@ -625,7 +626,7 @@ class phpbb_bbcode_parser extends phpbb_bbcode_parser_base
 	*
 	* @access private
 	*/
-	function path_not_in_domain($url)
+	protected function path_not_in_domain($url)
 	{
 		global $config, $phpEx, $user;
 
