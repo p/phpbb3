@@ -297,6 +297,7 @@ function user_add($user_row, $cp_data = false)
 			if ($config['new_member_group_default'])
 			{
 				group_user_add($add_group_id, $user_id, false, false, true);
+				$user_row['group_id'] = $add_group_id;
 			}
 			else
 			{
@@ -527,7 +528,7 @@ function user_delete($mode, $user_id, $post_username = false)
 
 	$db->sql_transaction('begin');
 
-	$table_ary = array(USERS_TABLE, USER_GROUP_TABLE, TOPICS_WATCH_TABLE, FORUMS_WATCH_TABLE, ACL_USERS_TABLE, TOPICS_TRACK_TABLE, TOPICS_POSTED_TABLE, FORUMS_TRACK_TABLE, PROFILE_FIELDS_DATA_TABLE, MODERATOR_CACHE_TABLE, DRAFTS_TABLE, BOOKMARKS_TABLE, SESSIONS_KEYS_TABLE);
+	$table_ary = array(USERS_TABLE, USER_GROUP_TABLE, TOPICS_WATCH_TABLE, FORUMS_WATCH_TABLE, ACL_USERS_TABLE, TOPICS_TRACK_TABLE, TOPICS_POSTED_TABLE, FORUMS_TRACK_TABLE, PROFILE_FIELDS_DATA_TABLE, MODERATOR_CACHE_TABLE, DRAFTS_TABLE, BOOKMARKS_TABLE, SESSIONS_KEYS_TABLE, PRIVMSGS_FOLDER_TABLE, PRIVMSGS_RULES_TABLE);
 
 	foreach ($table_ary as $table)
 	{
@@ -836,14 +837,15 @@ function user_ban($mode, $ban, $ban_len, $ban_len_other, $ban_exclude, $ban_reas
 				FROM ' . USERS_TABLE . '
 				WHERE ' . $db->sql_in_set('username_clean', $sql_usernames);
 
-			// Do not allow banning yourself
+			// Do not allow banning yourself, the guest account, or founders.
+			$non_bannable = array($user->data['user_id'], ANONYMOUS);
 			if (sizeof($founder))
 			{
-				$sql .= ' AND ' . $db->sql_in_set('user_id', array_merge(array_keys($founder), array($user->data['user_id'])), true);
+				$sql .= ' AND ' . $db->sql_in_set('user_id', array_merge(array_keys($founder), $non_bannable), true);
 			}
 			else
 			{
-				$sql .= ' AND user_id <> ' . $user->data['user_id'];
+				$sql .= ' AND ' . $db->sql_in_set('user_id', $non_bannable, true);
 			}
 
 			$result = $db->sql_query($sql);
@@ -2283,7 +2285,7 @@ function avatar_get_dimensions($avatar, $avatar_type, &$error, $current_x = 0, $
 /**
 * Uploading/Changing user avatar
 */
-function avatar_process_user(&$error, $custom_userdata = false)
+function avatar_process_user(&$error, $custom_userdata = false, $can_upload = null)
 {
 	global $config, $phpbb_root_path, $auth, $user, $db;
 
@@ -2322,7 +2324,10 @@ function avatar_process_user(&$error, $custom_userdata = false)
 	$avatar_select = basename(request_var('avatar_select', ''));
 
 	// Can we upload?
-	$can_upload = ($config['allow_avatar_upload'] && file_exists($phpbb_root_path . $config['avatar_path']) && @is_writable($phpbb_root_path . $config['avatar_path']) && $change_avatar && (@ini_get('file_uploads') || strtolower(@ini_get('file_uploads')) == 'on')) ? true : false;
+	if (is_null($can_upload))
+	{
+		$can_upload = ($config['allow_avatar_upload'] && file_exists($phpbb_root_path . $config['avatar_path']) && @is_writable($phpbb_root_path . $config['avatar_path']) && $change_avatar && (@ini_get('file_uploads') || strtolower(@ini_get('file_uploads')) == 'on')) ? true : false;
+	}
 
 	if ((!empty($_FILES['uploadfile']['name']) || $data['uploadurl']) && $can_upload)
 	{
@@ -2347,7 +2352,7 @@ function avatar_process_user(&$error, $custom_userdata = false)
 		}
 		else
 		{
-			list($sql_ary['user_avatar_width'], $sql_ary['user_avatar_height']) = getimagesize($phpbb_root_path . $config['avatar_gallery_path'] . '/' . $category . '/' . $sql_ary['user_avatar']);
+			list($sql_ary['user_avatar_width'], $sql_ary['user_avatar_height']) = getimagesize($phpbb_root_path . $config['avatar_gallery_path'] . '/' . $category . '/' . urldecode($sql_ary['user_avatar']));
 			$sql_ary['user_avatar'] = $category . '/' . $sql_ary['user_avatar'];
 		}
 	}

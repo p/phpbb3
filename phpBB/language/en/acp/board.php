@@ -50,7 +50,8 @@ $lang = array_merge($lang, array(
 	'SITE_DESC'						=> 'Site description',
 	'SITE_NAME'						=> 'Site name',
 	'SYSTEM_DST'					=> 'Enable Summer Time/<abbr title="Daylight Saving Time">DST</abbr>',
-	'SYSTEM_TIMEZONE'				=> 'System timezone',
+	'SYSTEM_TIMEZONE'				=> 'Guest timezone',
+	'SYSTEM_TIMEZONE_EXPLAIN'			=> 'Timezone to use for displaying times to users who are not logged in (guests, bots). Logged in users set their timezone during registration and can change it in user control panel.',
 	'WARNINGS_EXPIRE'				=> 'Warning duration',
 	'WARNINGS_EXPIRE_EXPLAIN'		=> 'Number of days that will elapse before the warning will automatically expire from a user’s record.',
 ));
@@ -211,7 +212,7 @@ $lang = array_merge($lang, array(
 	'NEW_MEMBER_POST_LIMIT'			=> 'New member post limit',
 	'NEW_MEMBER_POST_LIMIT_EXPLAIN'	=> 'New members are within the <em>Newly Registered Users</em> group until they reach this number of posts. You can use this group to keep them from using the PM system or to review their posts. <strong>A value of 0 disables this feature.</strong>',
 	'NEW_MEMBER_GROUP_DEFAULT'		=> 'Set Newly Registered Users group to default',
-	'NEW_MEMBER_GROUP_DEFAULT_EXPLAIN'	=> 'If set to yes and a new member post limit is specified newly registered users will be not only put into the <em>Newly Registered Users</em> group, but this group also being their default one. This may come in handy if you want to assign a group default rank and/or avatar the user then inherits.',
+	'NEW_MEMBER_GROUP_DEFAULT_EXPLAIN'	=> 'If set to yes, and a new member post limit is specified, newly registered users will not only be put into the <em>Newly Registered Users</em> group, but this group will also be their default one. This may come in handy if you want to assign a group default rank and/or avatar the user then inherits.',
 
 	'ACC_ADMIN'					=> 'By Admin',
 	'ACC_DISABLE'				=> 'Disable',

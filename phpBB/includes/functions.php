@@ -175,11 +175,8 @@ function set_config_count($config_name, $increment, $is_dynamic = false)
 	switch ($db->sql_layer)
 	{
 		case 'firebird':
-			$sql_update = 'CAST(CAST(config_value as integer) + ' . (int) $increment . ' as VARCHAR(255))';
-		break;
-
 		case 'postgres':
-			$sql_update = 'int4(config_value) + ' . (int) $increment;
+			$sql_update = 'CAST(CAST(config_value as DECIMAL(255, 0)) + ' . (int) $increment . ' as VARCHAR(255))';
 		break;
 
 		// MySQL, SQlite, mssql, mssql_odbc, oracle
@@ -1663,10 +1660,11 @@ function get_complete_topic_tracking($forum_id, $topic_ids, $global_announce_lis
 * @param string $sql_extra		Extra WHERE SQL statement
 * @param string $sql_sort		ORDER BY SQL sorting statement
 * @param string $sql_limit		Limits the size of unread topics list, 0 for unlimited query
+* @param string $sql_limit_offset  Sets the offset of the first row to search, 0 to search from the start
 *
 * @return array[int][int]		Topic ids as keys, mark_time of topic as value
 */
-function get_unread_topics($user_id = false, $sql_extra = '', $sql_sort = '', $sql_limit = 1001)
+function get_unread_topics($user_id = false, $sql_extra = '', $sql_sort = '', $sql_limit = 1001, $sql_limit_offset = 0)
 {
 	global $config, $db, $user;
 
@@ -1712,7 +1710,7 @@ function get_unread_topics($user_id = false, $sql_extra = '', $sql_sort = '', $s
 		);
 
 		$sql = $db->sql_build_query('SELECT', $sql_array);
-		$result = $db->sql_query_limit($sql, $sql_limit);
+		$result = $db->sql_query_limit($sql, $sql_limit, $sql_limit_offset);
 
 		while ($row = $db->sql_fetchrow($result))
 		{
@@ -1745,7 +1743,7 @@ function get_unread_topics($user_id = false, $sql_extra = '', $sql_sort = '', $s
 			WHERE t.topic_last_post_time > ' . $user_lastmark . "
 			$sql_extra
 			$sql_sort";
-		$result = $db->sql_query_limit($sql, $sql_limit);
+		$result = $db->sql_query_limit($sql, $sql_limit, $sql_limit_offset);
 
 		while ($row = $db->sql_fetchrow($result))
 		{
@@ -2581,6 +2579,47 @@ function meta_refresh($time, $url, $disable_cd_check = false)
 	return $url;
 }
 
+/**
+* Outputs correct status line header.
+*
+* Depending on php sapi one of the two following forms is used:
+*
+* Status: 404 Not Found
+*
+* HTTP/1.x 404 Not Found
+*
+* HTTP version is taken from HTTP_VERSION environment variable,
+* and defaults to 1.0.
+*
+* Sample usage:
+*
+* send_status_line(404, 'Not Found');
+*
+* @param int $code HTTP status code
+* @param string $message Message for the status code
+* @return void
+*/
+function send_status_line($code, $message)
+{
+	if (substr(strtolower(@php_sapi_name()), 0, 3) === 'cgi')
+	{
+		// in theory, we shouldn't need that due to php doing it. Reality offers a differing opinion, though
+		header("Status: $code $message", true, $code);
+	}
+	else
+	{
+		if (isset($_SERVER['HTTP_VERSION']))
+		{
+			$version = $_SERVER['HTTP_VERSION'];
+		}
+		else
+		{
+			$version = 'HTTP/1.0';
+		}
+		header("$version $code $message", true, $code);
+	}
+}
+
 //Form validation
 
 
@@ -3316,7 +3355,9 @@ function get_preg_expression($mode)
 	switch ($mode)
 	{
 		case 'email':
-			return '(?:[a-z0-9\'\.\-_\+\|]++|&amp;)+@[a-z0-9\-]+\.(?:[a-z0-9\-]+\.)*[a-z]+';
+			// Regex written by James Watts and Francisco Jose Martin Moreno
+			// http://fightingforalostcause.net/misc/2006/compare-email-regex.php
+			return '([\w\!\#$\%\&\'\*\+\-\/\=\?\^\`{\|\}\~]+\.)*(?:[\w\!\#$\%\'\*\+\-\/\=\?\^\`{\|\}\~]|&amp;)+@((((([a-z0-9]{1}[a-z0-9\-]{0,62}[a-z0-9]{1})|[a-z])\.)+[a-z]{2,6})|(\d{1,3}\.){3}\d{1,3}(\:\d{1,5})?)';
 		break;
 
 		case 'bbcode_htm':
@@ -3338,7 +3379,7 @@ function get_preg_expression($mode)
 		break;
 
 		case 'ipv6':
-			return '#^(?:(?:(?:[\dA-F]{1,4}:){6}(?:[\dA-F]{1,4}:[\dA-F]{1,4}|(?:(?:\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.){3}(?:\d{1,2}|1\d\d|2[0-4]\d|25[0-5])))|(?:::(?:[\dA-F]{1,4}:){5}(?:[\dA-F]{1,4}:[\dA-F]{1,4}|(?:(?:\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.){3}(?:\d{1,2}|1\d\d|2[0-4]\d|25[0-5])))|(?:(?:[\dA-F]{1,4}:):(?:[\dA-F]{1,4}:){4}(?:[\dA-F]{1,4}:[\dA-F]{1,4}|(?:(?:\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.){3}(?:\d{1,2}|1\d\d|2[0-4]\d|25[0-5])))|(?:(?:[\dA-F]{1,4}:){1,2}:(?:[\dA-F]{1,4}:){3}(?:[\dA-F]{1,4}:[\dA-F]{1,4}|(?:(?:\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.){3}(?:\d{1,2}|1\d\d|2[0-4]\d|25[0-5])))|(?:(?:[\dA-F]{1,4}:){1,3}:(?:[\dA-F]{1,4}:){2}(?:[\dA-F]{1,4}:[\dA-F]{1,4}|(?:(?:\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.){3}(?:\d{1,2}|1\d\d|2[0-4]\d|25[0-5])))|(?:(?:[\dA-F]{1,4}:){1,4}:(?:[\dA-F]{1,4}:)(?:[\dA-F]{1,4}:[\dA-F]{1,4}|(?:(?:\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.){3}(?:\d{1,2}|1\d\d|2[0-4]\d|25[0-5])))|(?:(?:[\dA-F]{1,4}:){1,5}:(?:[\dA-F]{1,4}:[\dA-F]{1,4}|(?:(?:\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.){3}(?:\d{1,2}|1\d\d|2[0-4]\d|25[0-5])))|(?:(?:[\dA-F]{1,4}:){1,6}:[\dA-F]{1,4})|(?:(?:[\dA-F]{1,4}:){1,7}:))$#i';
+			return '#^(?:(?:(?:[\dA-F]{1,4}:){6}(?:[\dA-F]{1,4}:[\dA-F]{1,4}|(?:(?:\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.){3}(?:\d{1,2}|1\d\d|2[0-4]\d|25[0-5])))|(?:::(?:[\dA-F]{1,4}:){0,5}(?:[\dA-F]{1,4}(?::[\dA-F]{1,4})?|(?:(?:\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.){3}(?:\d{1,2}|1\d\d|2[0-4]\d|25[0-5])))|(?:(?:[\dA-F]{1,4}:):(?:[\dA-F]{1,4}:){4}(?:[\dA-F]{1,4}:[\dA-F]{1,4}|(?:(?:\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.){3}(?:\d{1,2}|1\d\d|2[0-4]\d|25[0-5])))|(?:(?:[\dA-F]{1,4}:){1,2}:(?:[\dA-F]{1,4}:){3}(?:[\dA-F]{1,4}:[\dA-F]{1,4}|(?:(?:\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.){3}(?:\d{1,2}|1\d\d|2[0-4]\d|25[0-5])))|(?:(?:[\dA-F]{1,4}:){1,3}:(?:[\dA-F]{1,4}:){2}(?:[\dA-F]{1,4}:[\dA-F]{1,4}|(?:(?:\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.){3}(?:\d{1,2}|1\d\d|2[0-4]\d|25[0-5])))|(?:(?:[\dA-F]{1,4}:){1,4}:(?:[\dA-F]{1,4}:)(?:[\dA-F]{1,4}:[\dA-F]{1,4}|(?:(?:\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.){3}(?:\d{1,2}|1\d\d|2[0-4]\d|25[0-5])))|(?:(?:[\dA-F]{1,4}:){1,5}:(?:[\dA-F]{1,4}:[\dA-F]{1,4}|(?:(?:\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.){3}(?:\d{1,2}|1\d\d|2[0-4]\d|25[0-5])))|(?:(?:[\dA-F]{1,4}:){1,6}:[\dA-F]{1,4})|(?:(?:[\dA-F]{1,4}:){1,7}:)|(?:::))$#i';
 		break;
 
 		case 'url':
@@ -3409,13 +3450,14 @@ function phpbb_checkdnsrr($host, $type = '')
 {
 	$type = (!$type) ? 'MX' : $type;
 
-	if (DIRECTORY_SEPARATOR == '\\')
+	// Call checkdnsrr() if available. This is also the case on Windows with PHP 5.3 or later.
+	if (function_exists('checkdnsrr'))
 	{
-		if (!function_exists('exec'))
-		{
-			return NULL;
-		}
-
+		// The dot indicates to search the DNS root (helps those having DNS prefixes on the same domain)
+		return checkdnsrr($host . '.', $type);
+	}
+	else if (DIRECTORY_SEPARATOR == '\\' && function_exists('exec'))
+	{
 		// @exec('nslookup -retry=1 -timout=1 -type=' . escapeshellarg($type) . ' ' . escapeshellarg($host), $output);
 		@exec('nslookup -type=' . escapeshellarg($type) . ' ' . escapeshellarg($host) . '.', $output);
 
@@ -3440,11 +3482,6 @@ function phpbb_checkdnsrr($host, $type = '')
 		}
 
 		return false;
-	}
-	else if (function_exists('checkdnsrr'))
-	{
-		// The dot indicates to search the DNS root (helps those having DNS prefixes on the same domain)
-		return (checkdnsrr($host . '.', $type)) ? true : false;
 	}
 
 	return NULL;
@@ -3626,6 +3663,11 @@ function msg_handler($errno, $msg_text, $errfile, $errline)
 			if (empty($user->lang))
 			{
 				$user->setup();
+			}
+
+			if ($msg_text == 'ERROR_NO_ATTACHMENT' || $msg_text == 'NO_FORUM' || $msg_text == 'NO_TOPIC' || $msg_text == 'NO_USER')
+			{
+				send_status_line(404, 'Not Found');
 			}
 
 			$msg_text = (!empty($user->lang[$msg_text])) ? $user->lang[$msg_text] : $msg_text;
@@ -4278,7 +4320,7 @@ function page_header($page_title = '', $display_online_list = true, $item_id = 0
 		'T_ICONS_PATH'			=> "{$web_path}{$config['icons_path']}/",
 		'T_RANKS_PATH'			=> "{$web_path}{$config['ranks_path']}/",
 		'T_UPLOAD_PATH'			=> "{$web_path}{$config['upload_path']}/",
-		'T_STYLESHEET_LINK'		=> (!$user->theme['theme_storedb']) ? "{$web_path}styles/" . $user->theme['theme_path'] . '/theme/stylesheet.css' : append_sid("{$phpbb_root_path}style.$phpEx", 'id=' . $user->theme['style_id'] . '&amp;lang=' . $user->data['user_lang'], true, $user->session_id),
+		'T_STYLESHEET_LINK'		=> (!$user->theme['theme_storedb']) ? "{$web_path}styles/" . $user->theme['theme_path'] . '/theme/stylesheet.css' : append_sid("{$phpbb_root_path}style.$phpEx", 'id=' . $user->theme['style_id'] . '&amp;lang=' . $user->data['user_lang']),
 		'T_STYLESHEET_NAME'		=> $user->theme['theme_name'],
 
 		'T_THEME_NAME'			=> $user->theme['theme_path'],

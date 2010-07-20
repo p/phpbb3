@@ -685,7 +685,6 @@ function _add_modules($modules_to_install)
 				WHERE module_class = '" . $db->sql_escape($module_data['class']) . "'
 					AND parent_id = {$parent_id}
 					AND left_id BETWEEN {$first_left_id} AND {$module_row['left_id']}
-				GROUP BY left_id
 				ORDER BY left_id";
 			$result = $db->sql_query($sql);
 			$steps = (int) $db->sql_fetchfield('num_modules');
@@ -913,6 +912,8 @@ function database_update_info()
 		'3.0.7-RC2'		=> array(),
 		// No changes from 3.0.7 to 3.0.7-PL1
 		'3.0.7'		=> array(),
+		// No changes from 3.0.7-PL1 to 3.0.8-RC1
+		'3.0.7-PL1'		=> array(),
 	);
 }
 
@@ -923,7 +924,7 @@ function database_update_info()
 *****************************************************************************/
 function change_database_data(&$no_updates, $version)
 {
-	global $db, $errored, $error_ary, $config, $phpbb_root_path, $phpEx;
+	global $db, $errored, $error_ary, $config, $phpbb_root_path, $phpEx, $user;
 
 	switch ($version)
 	{
@@ -1647,6 +1648,108 @@ function change_database_data(&$no_updates, $version)
 
 		// No changes from 3.0.7 to 3.0.7-PL1
 		case '3.0.7':
+		break;
+
+		// Changes from 3.0.7-PL1 to 3.0.8-RC1
+		case '3.0.7-PL1':
+			$user->add_lang('acp/attachments');
+			$extension_groups = array(
+				$user->lang['EXT_GROUP_ARCHIVES']			=> 'ARCHIVES',
+				$user->lang['EXT_GROUP_DOCUMENTS']			=> 'DOCUMENTS',
+				$user->lang['EXT_GROUP_DOWNLOADABLE_FILES']	=> 'DOWNLOADABLE_FILES',
+				$user->lang['EXT_GROUP_FLASH_FILES']		=> 'FLASH_FILES',
+				$user->lang['EXT_GROUP_IMAGES']				=> 'IMAGES',
+				$user->lang['EXT_GROUP_PLAIN_TEXT']			=> 'PLAIN_TEXT',
+				$user->lang['EXT_GROUP_QUICKTIME_MEDIA']	=> 'QUICKTIME_MEDIA',
+				$user->lang['EXT_GROUP_REAL_MEDIA']			=> 'REAL_MEDIA',
+				$user->lang['EXT_GROUP_WINDOWS_MEDIA']		=> 'WINDOWS_MEDIA',
+			);
+
+			$sql = 'SELECT group_id, group_name
+				FROM ' . EXTENSION_GROUPS_TABLE;
+			$result = $db->sql_query($sql);
+
+			while ($row = $db->sql_fetchrow($result))
+			{
+				if (isset($extension_groups[$row['group_name']]))
+				{
+					$sql_ary = array(
+						'group_name'	=> $extension_groups[$row['group_name']],
+					);
+					$sql = 'UPDATE ' . EXTENSION_GROUPS_TABLE . ' SET ' . $db->sql_build_array('UPDATE', $sql_ary) . '
+						WHERE group_id = ' . (int) $row['group_id'];
+					_sql($sql, $errored, $error_ary);
+				}
+			}
+			$db->sql_freeresult($result);
+
+			// Install modules
+			$modules_to_install = array(
+				'post'					=> array(
+					'base'		=> 'board',
+					'class'		=> 'acp',
+					'title'		=> 'ACP_POST_SETTINGS',
+					'auth'		=> 'acl_a_board',
+					'cat'		=> 'ACP_MESSAGES',
+					'after'		=> array('message', 'ACP_MESSAGE_SETTINGS')
+				),
+			);
+
+			_add_modules($modules_to_install);
+
+			// add Bing Bot
+			$sql = 'SELECT group_id, group_colour
+				FROM ' . GROUPS_TABLE . "
+				WHERE group_name = 'BOTS'";
+			$result = $db->sql_query($sql);
+			$group_row = $db->sql_fetchrow($result);
+			$db->sql_freeresult($result);
+
+			if (!$group_row)
+			{
+				// default fallback, should never get here
+				$group_row['group_id'] = 6;
+				$group_row['group_colour'] = '9E8DA7';
+			}
+
+			if (!function_exists('user_add'))
+			{
+				include($phpbb_root_path . 'includes/functions_user.' . $phpEx);
+			}
+
+			$bot_name = 'Bing [Bot]';
+			$bot_agent = 'bingbot/';
+			$bot_ip = '';
+
+			$user_row = array(
+				'user_type'				=> USER_IGNORE,
+				'group_id'				=> $group_row['group_id'],
+				'username'				=> $bot_name,
+				'user_regdate'			=> time(),
+				'user_password'			=> '',
+				'user_colour'			=> $group_row['group_colour'],
+				'user_email'			=> '',
+				'user_lang'				=> $config['default_lang'],
+				'user_style'			=> $config['default_style'],
+				'user_timezone'			=> 0,
+				'user_dateformat'		=> $config['default_dateformat'],
+				'user_allow_massemail'	=> 0,
+			);
+
+			$user_id = user_add($user_row);
+
+			$sql = 'INSERT INTO ' . BOTS_TABLE . ' ' . $db->sql_build_array('INSERT', array(
+				'bot_active'	=> 1,
+				'bot_name'		=> (string) $bot_name,
+				'user_id'		=> (int) $user_id,
+				'bot_agent'		=> (string) $bot_agent,
+				'bot_ip'		=> (string) $bot_ip,
+			));
+
+			_sql($sql, $errored, $error_ary);
+			// end Bing Bot addition
+
+			$no_updates = false;
 		break;
 	}
 }
