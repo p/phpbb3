@@ -566,6 +566,35 @@ function user_delete($mode, $user_id, $post_username = false)
 		WHERE session_user_id = ' . $user_id;
 	$db->sql_query($sql);
 
+	// Remove all poll votes from user_id
+	$sql = 'SELECT poll_option_id, topic_id
+		FROM ' . POLL_VOTES_TABLE . '
+		WHERE vote_user_id = ' . $user_id;
+	$result = $db->sql_query($sql);
+
+	while ($row = $db->sql_fetchrow($result))
+	{
+		$voted_option[] = array(
+			'option_id'		=> $row['poll_option_id'],
+			'topic_id'		=> $row['topic_id'],
+		);
+	}
+	$db->sql_freeresult($result);
+
+	$sql = 'DELETE FROM ' . POLL_VOTES_TABLE . '
+		WHERE vote_user_id = ' . $user_id;
+	$db->sql_query($sql);
+
+	// Decrement the option counters on the polls
+	foreach ($voted_option as $option)
+	{
+		$sql = 'UPDATE ' . POLL_OPTIONS_TABLE . '
+		SET poll_option_total = poll_option_total - 1
+		WHERE poll_option_id = ' . $option['option_id'] . '
+			AND topic_id = ' . $option['topic_id'];
+		$db->sql_query($sql);
+	}
+
 	// Remove any undelivered mails...
 	$sql = 'SELECT msg_id, user_id
 		FROM ' . PRIVMSGS_TO_TABLE . '
