@@ -4,7 +4,7 @@
 * @package phpBB3
 * @version $Id$
 * @copyright (c) 2006 phpBB Group
-* @license http://opensource.org/licenses/gpl-license.php GNU Public License
+* @license http://opensource.org/licenses/gpl-2.0.php GNU General Public License, version 2
 *
 * This file creates new schema files for every database.
 * The filenames will be prefixed with an underscore to not overwrite the current schema files.
