@@ -47,6 +47,19 @@ $sort_dir		= request_var('sd', 'd');
 $return_chars	= request_var('ch', ($topic_id) ? -1 : 300);
 $search_forum	= request_var('fid', array(0));
 
+// Output headers first so that error messages also get them
+if ($_SERVER['SERVER_PROTOCOL'] == 'HTTP/1.1')
+{
+	// RFC2616 defines Pragma: no-cache to mean Cache-Control: no-cache.
+	// Thus if the request is HTTP 1.1, we only serve Cache-Control header.
+	header('Cache-Control: must-revalidate');
+}
+else
+{
+	// HTTP 1.0, or 0.9
+	header('Pragma: no-cache');
+}
+
 // We put login boxes for the case if search_id is newposts, egosearch or unreadposts
 // because a guest should be able to log in even if guests search is not permitted
 
