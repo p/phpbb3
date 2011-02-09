@@ -673,7 +673,7 @@ function set_modified_headers($stamp, $browser)
 {
 	// let's see if we have to send the file at all
 	$last_load = phpbb_parse_if_modified_since();
-	if ((strpos(strtolower($browser), 'msie 6.0') === false) && (strpos(strtolower($browser), 'msie 8.0') === false))
+	if (phpbb_browser_supports_if_modified_since($browser))
 	{
 		if ($last_load !== false && $last_load >= $stamp)
 		{

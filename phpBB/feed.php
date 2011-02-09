@@ -142,7 +142,7 @@ $feed->close();
 // See: http://tools.ietf.org/html/rfc2616#section-14.25
 $if_modified_time = phpbb_parse_if_modified_since();
 
-if ($if_modified_time && $if_modified_time >= $feed_updated_time)
+if ($if_modified_time && $if_modified_time >= $feed_updated_time && phpbb_browser_supports_if_modified_since())
 {
 	send_status_line(304, 'Not Modified');
 	garbage_collection();

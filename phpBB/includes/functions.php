@@ -4249,6 +4249,29 @@ function phpbb_parse_if_modified_since($date = false)
 }
 
 /**
+* Determines whether the user's browser (user agent) properly supports
+* If-Modified-Since.
+*
+* The user agent string may be explicitly given in $browser. If $browser is
+* not given, $user->browser would be used for the user agent string.
+*
+* @param string $browser The user agent string to check, or false to use $user->browser
+* @return bool Whether the user agent properly supports If-Modified-Since
+*/
+function phpbb_browser_supports_if_modified_since($browser = false)
+{
+	if ($browser === false)
+	{
+		global $user;
+		$browser = $user->browser;
+	}
+
+	$browser = strtolower($browser);
+
+	return strpos($browser, 'msie 6.0') === false && strpos($browser, 'msie 8.0') === false;
+}
+
+/**
 * Login using http authenticate.
 *
 * @param array	$param		Parameter array, see $param_defaults array.
