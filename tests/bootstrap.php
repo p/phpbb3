@@ -25,6 +25,14 @@ else
 	define('STRIP', (get_magic_quotes_gpc()) ? true : false);
 }
 
+// cache tests use tmp/cache; use a different directory here
+// to avoid unintentional/unexpected interactions in tests
+define('PHPBB_CACHE_DIR', dirname(__FILE__) . 'tmp/default_cache');
+if (!file_exists(PHPBB_CACHE_DIR))
+{
+	mkdir(PHPBB_CACHE_DIR);
+}
+
 require_once $phpbb_root_path . 'includes/constants.php';
 require_once $phpbb_root_path . 'includes/class_loader.' . $phpEx;
 
