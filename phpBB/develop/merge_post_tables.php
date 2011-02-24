@@ -34,7 +34,8 @@ $db = $dbhost = $dbuser = $dbpasswd = $dbport = $dbname = '';
 
 define('IN_PHPBB', 1);
 define('ANONYMOUS', 1);
-$phpbb_root_path='./../';
+$phpbb_root_path = './../';
+$phpbb_root_url = './../';
 include($phpbb_root_path . 'extension.inc');
 include($phpbb_root_path . 'config.'.$phpEx);
 include($phpbb_root_path . 'includes/functions.'.$phpEx);

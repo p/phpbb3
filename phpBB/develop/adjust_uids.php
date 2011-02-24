@@ -13,6 +13,7 @@ set_time_limit(0);
 
 define('IN_PHPBB', true);
 $phpbb_root_path = './../';
+$phpbb_root_url = './../';
 $phpEx = substr(strrchr(__FILE__, '.'), 1);
 include($phpbb_root_path . 'common.'.$phpEx);
 

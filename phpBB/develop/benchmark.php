@@ -15,6 +15,7 @@ die("Please read the first lines of this script for instructions on how to enabl
 
 
 $phpbb_root_path = "../";
+$phpbb_root_url = '../';
 include($phpbb_root_path . 'extension.inc');
 include($phpbb_root_path . 'common.'.$phpEx);
 include($phpbb_root_path . 'includes/post.'.$phpEx);

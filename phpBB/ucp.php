@@ -13,6 +13,7 @@
 */
 define('IN_PHPBB', true);
 $phpbb_root_path = (defined('PHPBB_ROOT_PATH')) ? PHPBB_ROOT_PATH : './';
+$phpbb_root_url = (defined('PHPBB_ROOT_URL')) ? PHPBB_ROOT_URL : './';
 $phpEx = substr(strrchr(__FILE__, '.'), 1);
 require($phpbb_root_path . 'common.' . $phpEx);
 require($phpbb_root_path . 'includes/functions_user.' . $phpEx);

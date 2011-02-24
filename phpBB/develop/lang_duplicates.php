@@ -25,7 +25,8 @@ die("Please read the first lines of this script for instructions on how to enabl
 
 define('IN_PHPBB', 1);
 $phpEx = substr(strrchr(__FILE__, '.'), 1);
-$phpbb_root_path='./../';
+$phpbb_root_path = './../';
+$phpbb_root_url = './../';
 include($phpbb_root_path . 'common.'.$phpEx);
 
 $mode = request_var('mode', '');
