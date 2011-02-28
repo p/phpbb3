@@ -2326,7 +2326,7 @@ function reapply_sid($url)
 */
 function build_url($strip_vars = false)
 {
-	global $user, $phpbb_root_path;
+	global $user, $phpbb_root_url;
 
 	// Append SID
 	$redirect = append_sid($user->page['page'], false, false);
@@ -2386,7 +2386,7 @@ function build_url($strip_vars = false)
 
 	// We need to be cautious here.
 	// On some situations, the redirect path is an absolute URL, sometimes a relative path
-	// For a relative path, let's prefix it with $phpbb_root_path to point to the correct location,
+	// For a relative path, let's prefix it with $phpbb_root_url to point to the correct location,
 	// else we use the URL directly.
 	$url_parts = @parse_url($redirect);
 
@@ -2396,7 +2396,7 @@ function build_url($strip_vars = false)
 		return str_replace('&', '&amp;', $redirect);
 	}
 
-	return $phpbb_root_path . str_replace('&', '&amp;', $redirect);
+	return $phpbb_root_url . str_replace('&', '&amp;', $redirect);
 }
 
 /**
