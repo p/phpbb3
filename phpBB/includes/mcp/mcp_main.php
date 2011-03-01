@@ -642,6 +642,12 @@ function mcp_move_topic($topic_ids)
 
 		$db->sql_transaction('begin');
 
+		// Move topics, but do not resync yet
+		$move_result = move_topics($topic_ids, $to_forum_id, false);
+
+		$topics_moved			-= $move_result['shadow_topics_removed'];
+		$topics_authed_moved	-= $move_result['shadow_topics_removed'];
+
 		$sync_sql = array();
 
 		if ($topic_posts_added)
@@ -655,9 +661,6 @@ function mcp_move_topic($topic_ids)
 		}
 
 		$sync_sql[$to_forum_id][] = 'forum_topics_real = forum_topics_real + ' . (int) $topics_moved;
-
-		// Move topics, but do not resync yet
-		move_topics($topic_ids, $to_forum_id, false);
 
 		$forum_ids = array($to_forum_id);
 		foreach ($topic_data as $topic_id => $row)

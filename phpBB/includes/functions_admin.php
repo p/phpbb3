@@ -498,6 +498,8 @@ function filelist($rootdir, $dir = '', $type = 'gif|jpg|jpeg|png')
 
 /**
 * Move topic(s)
+*
+* @return array
 */
 function move_topics($topic_ids, $forum_id, $auto_sync = true)
 {
@@ -515,10 +517,14 @@ function move_topics($topic_ids, $forum_id, $auto_sync = true)
 		$topic_ids = array($topic_ids);
 	}
 
+	$return_array = array();
+
 	$sql = 'DELETE FROM ' . TOPICS_TABLE . '
 		WHERE ' . $db->sql_in_set('topic_moved_id', $topic_ids) . '
 			AND forum_id = ' . $forum_id;
 	$db->sql_query($sql);
+
+	$return_array['shadow_topics_removed'] = (int) $db->sql_affectedrows();
 
 	if ($auto_sync)
 	{
@@ -532,6 +538,8 @@ function move_topics($topic_ids, $forum_id, $auto_sync = true)
 			$forum_ids[] = $row['forum_id'];
 		}
 		$db->sql_freeresult($result);
+
+		$return_array['source_forum_ids'] = $forum_ids;
 	}
 
 	$table_ary = array(TOPICS_TABLE, POSTS_TABLE, LOG_TABLE, DRAFTS_TABLE, TOPICS_TRACK_TABLE);
@@ -549,6 +557,8 @@ function move_topics($topic_ids, $forum_id, $auto_sync = true)
 		sync('forum', 'forum_id', $forum_ids, true, true);
 		unset($forum_ids);
 	}
+
+	return $return_array;
 }
 
 /**
