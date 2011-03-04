@@ -89,6 +89,8 @@ function display_forums($root_data = '', $display_moderators = true, $return_mod
 		$sql_array['SELECT'] .= ', fa.user_id';
 	}
 
+	run_hooks('display_forums_sql_inject', &$sql_array);
+
 	$sql = $db->sql_build_query('SELECT', array(
 		'SELECT'	=> $sql_array['SELECT'],
 		'FROM'		=> $sql_array['FROM'],
@@ -106,6 +108,8 @@ function display_forums($root_data = '', $display_moderators = true, $return_mod
 
 	while ($row = $db->sql_fetchrow($result))
 	{
+		run_hooks('display_forums_row_inject', &$row);
+
 		$forum_id = $row['forum_id'];
 
 		// Mark forums read?
@@ -203,6 +207,9 @@ function display_forums($root_data = '', $display_moderators = true, $return_mod
 			}
 			$forum_rows[$parent_id]['forum_id_last_post'] = $row['forum_id'];
 			$forum_rows[$parent_id]['orig_forum_last_post_time'] = $row['forum_last_post_time'];
+			
+			$data = array(&$forum_rows, &$parent_id, &$row);
+			run_hooks('display_forums_row_values_inject', &$data);
 		}
 		else if ($row['forum_type'] != FORUM_CAT)
 		{
@@ -467,6 +474,8 @@ function display_forums($root_data = '', $display_moderators = true, $return_mod
 			'U_LAST_POSTER'		=> get_username_string('profile', $row['forum_last_poster_id'], $row['forum_last_poster_name'], $row['forum_last_poster_colour']),
 			'U_LAST_POST'		=> $last_post_url)
 		);
+		
+		run_hooks('display_forums_assign_block_vars', &$row);
 
 		// Assign subforums loop for style authors
 		foreach ($subforums_list as $subforum)
