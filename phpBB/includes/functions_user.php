@@ -2136,6 +2136,7 @@ function avatar_gallery($category, $avatar_select, $items_per_column, $block_var
 	global $config, $phpbb_root_path;
 
 	$avatar_list = array();
+	$avatar_categories = array();
 
 	$path = $phpbb_root_path . $config['avatar_gallery_path'];
 
@@ -2155,8 +2156,11 @@ function avatar_gallery($category, $avatar_select, $items_per_column, $block_var
 
 		while (($file = readdir($dp)) !== false)
 		{
+			$file_md5 = md5($file);
+
 			if ($file[0] != '.' && preg_match('#^[^&"\'<>]+$#i', $file) && is_dir("$path/$file"))
 			{
+				$avatar_categories[$file] = utf8_clean_string($file);
 				$avatar_row_count = $avatar_col_count = 0;
 
 				if ($dp2 = @opendir("$path/$file"))
@@ -2165,7 +2169,7 @@ function avatar_gallery($category, $avatar_select, $items_per_column, $block_var
 					{
 						if (preg_match('#^[^&\'"<>]+\.(?:gif|png|jpe?g)$#i', $sub_file))
 						{
-							$avatar_list[$file][$avatar_row_count][$avatar_col_count] = array(
+							$avatar_list[$file_md5][$avatar_row_count][$avatar_col_count] = array(
 								'file'		=> rawurlencode($file) . '/' . rawurlencode($sub_file),
 								'filename'	=> rawurlencode($sub_file),
 								'name'		=> ucfirst(str_replace('_', ' ', preg_replace('#^(.*)\..*$#', '\1', $sub_file))),
@@ -2183,6 +2187,8 @@ function avatar_gallery($category, $avatar_select, $items_per_column, $block_var
 			}
 		}
 		closedir($dp);
+
+		asort($avatar_categories);
 	}
 
 	if (!sizeof($avatar_list))
@@ -2190,15 +2196,15 @@ function avatar_gallery($category, $avatar_select, $items_per_column, $block_var
 		$avatar_list = array($user->lang['NO_AVATAR_CATEGORY'] => array());
 	}
 
-	@ksort($avatar_list);
-
 	$category = (!$category) ? key($avatar_list) : $category;
-	$avatar_categories = array_keys($avatar_list);
+	//var_dump($category);
 
 	$s_category_options = '';
-	foreach ($avatar_categories as $cat)
+	foreach ($avatar_categories as $cat => $null)
 	{
-		$s_category_options .= '<option value="' . $cat . '"' . (($cat == $category) ? ' selected="selected"' : '') . '>' . $cat . '</option>';
+		$cat_md5 = md5($cat);
+
+		$s_category_options .= '<option value="' . $cat_md5 . '"' . (($cat_md5 == $category) ? ' selected="selected"' : '') . '>' . $cat . '</option>';
 	}
 
 	$template->assign_vars(array(
