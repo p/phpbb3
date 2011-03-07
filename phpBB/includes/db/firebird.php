@@ -66,6 +66,8 @@ class dbal_firebird extends dbal
 				$this->connect_error = 'ibase_pconnect function does not exist, is interbase extension installed?';
 				return $this->sql_error('');
 			}
+			$collector = new phpbb_error_collector;
+			$collector->install();
 			$this->db_connect_id = @ibase_pconnect($use_database, $this->user, $sqlpassword, false, false, 3);
 		}
 		else
@@ -75,6 +77,8 @@ class dbal_firebird extends dbal
 				$this->connect_error = 'ibase_connect function does not exist, is interbase extension installed?';
 				return $this->sql_error('');
 			}
+			$collector = new phpbb_error_collector;
+			$collector->install();
 			$this->db_connect_id = @ibase_connect($use_database, $this->user, $sqlpassword, false, false, 3);
 		}
 
@@ -89,7 +93,17 @@ class dbal_firebird extends dbal
 			$this->service_handle = false;
 		}
 
-		return ($this->db_connect_id) ? $this->db_connect_id : $this->sql_error('');
+		$collector->uninstall();
+
+		if ($this->db_connect_id)
+		{
+			return $this->db_connect_id;
+		}
+		else
+		{
+			$errors = $collector->format_errors();
+			return $this->sql_error($errors);
+		}
 	}
 
 	/**
