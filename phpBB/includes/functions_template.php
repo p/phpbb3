@@ -235,6 +235,12 @@ class template_compile
 				case 'PHP':
 					$compile_blocks[] = ($config['tpl_allow_php']) ? '<?php ' . array_shift($php_blocks) . ' ?>' : '';
 				break;
+				
+				case 'RUNHOOKS':
+					// return value here will be compiled code (html with embedded php).
+					// we don't want to wrap it in php tags here.
+					$compile_blocks[] = $this->compile_tag_run_hooks($block_val[2]);
+					break;
 
 				default:
 					$this->compile_var_tags($block_val[0]);
@@ -309,6 +315,24 @@ class template_compile
 		$text_blocks = preg_replace('#\{\$([A-Z0-9\-_]+)\}#', "<?php echo (isset(\$this->_tpldata['DEFINE']['.']['\\1'])) ? \$this->_tpldata['DEFINE']['.']['\\1'] : ''; ?>", $text_blocks);
 
 		return;
+	}
+
+	/**
+	* $tag_args should be a single string identifying hook location.
+	*/
+	function compile_tag_run_hooks($tag_args)
+	{
+		if (!preg_match('/^\w+$/', $tag_args)) {
+			// do something
+			var_dump($tag_args);
+		}
+		$location = $tag_args;
+		// 1. find all mods defining hooks for location
+		// 2. obtain mods' template fragments
+		// 3. compile template fragments
+		// 4. return compiled code
+		// note: need to make sure we get fragments in the right order
+		return 'echo "test";';
 	}
 
 	/**
