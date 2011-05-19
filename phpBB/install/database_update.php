@@ -929,6 +929,9 @@ function database_update_info()
 					'topics_forum_id_type_last_post_time' => array('forum_id', 'topic_type', 'topic_last_post_time'),
 				),
 			),
+			'drop_keys'		=> array(
+				TOPICS_TABLE		=> array('topics_forum_id', 'topics_forum_id_type'),
+			),
 		),
 	);
 }
