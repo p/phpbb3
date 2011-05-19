@@ -924,6 +924,11 @@ function database_update_info()
 					'bbcode_id'	=> array('USINT', 0),
 				),
 			),
+			'add_index'		=> array(
+				TOPICS_TABLE		=> array(
+					'topics_forum_id_type_last_post_time' => array('forum_id', 'topic_type', 'topic_last_post_time'),
+				),
+			),
 		),
 	);
 }
