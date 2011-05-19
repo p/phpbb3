@@ -817,8 +817,7 @@ CREATE TABLE phpbb_topics (
 	poll_vote_change INTEGER UNSIGNED NOT NULL DEFAULT '0'
 );
 
-CREATE INDEX phpbb_topics_forum_id ON phpbb_topics (forum_id);
-CREATE INDEX phpbb_topics_forum_id_type ON phpbb_topics (forum_id, topic_type);
+CREATE INDEX phpbb_topics_forum_id_type_last_post_time ON phpbb_topics (forum_id, topic_type, topic_last_post_time);
 CREATE INDEX phpbb_topics_last_post_time ON phpbb_topics (topic_last_post_time);
 CREATE INDEX phpbb_topics_topic_approved ON phpbb_topics (topic_approved);
 CREATE INDEX phpbb_topics_forum_appr_last ON phpbb_topics (forum_id, topic_approved, topic_last_post_id);

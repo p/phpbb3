@@ -1465,10 +1465,7 @@ ALTER TABLE [phpbb_topics] WITH NOCHECK ADD
 	)  ON [PRIMARY] 
 GO
 
-CREATE  INDEX [forum_id] ON [phpbb_topics]([forum_id]) ON [PRIMARY]
-GO
-
-CREATE  INDEX [forum_id_type] ON [phpbb_topics]([forum_id], [topic_type]) ON [PRIMARY]
+CREATE  INDEX [forum_id_type_last_post_time] ON [phpbb_topics]([forum_id], [topic_type], [topic_last_post_time]) ON [PRIMARY]
 GO
 
 CREATE  INDEX [last_post_time] ON [phpbb_topics]([topic_last_post_time]) ON [PRIMARY]
