@@ -145,7 +145,7 @@ $lang = array_merge($lang, array(
 	'PHP_ATTACHMENT_LIMIT_UNKNOWN'	=> 'Could not determine the maximum upload and/or POST sizes defined by PHP in php.ini.',
 	'PHP_ATTACHMENT_TOO_LARGE'	=> 'The attachment’s file size is too large.',
 	'PHP_POST_MISSING'			=> 'No POST data was received. If you tried uploading an attachment, it was too large and prevented the form from being processed at all. Please use the "Back" button in your browser to return to the previous page and try uploading a smaller attachment.',
-	'PHP_POST_OVERRUN_INSTRUCTIONS'	=> 'If you are an administrator, please note that you must set <a href="http://php.net/manual/en/ini.core.php#ini.post-max-size">memory_limit, post_max_size and upload_max_filesize</a> to sufficiently large values to allow large file uploads.',
+	'PHP_POST_OVERRUN_INSTRUCTIONS'	=> 'Please note that you must set <a href="http://php.net/manual/en/ini.core.php#ini.post-max-size">memory_limit, post_max_size and upload_max_filesize</a> to sufficiently large values to allow large file uploads.',
 	'PHP_POST_RECIPIENTS_LOST'	=> 'Please note that the list of recipients had been cleared as well.',
 	'PLACE_INLINE'				=> 'Place inline',
 	'POLL_DELETE'				=> 'Delete poll',

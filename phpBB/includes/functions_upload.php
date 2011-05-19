@@ -1037,7 +1037,7 @@ function phpbb_format_upload_limit_message($include_post = false)
 */
 function phpbb_format_upload_too_large_message($messages, $post_overrun = false)
 {
-	global $user;
+	global $user, $auth;
 
 	$overrun_message = '';
 	foreach ($messages as $message)
@@ -1050,7 +1050,9 @@ function phpbb_format_upload_too_large_message($messages, $post_overrun = false)
 	}
 	$overrun_message .= '<br /><br />';
 	$overrun_message .= phpbb_format_upload_limit_message($post_overrun);
-	if ($post_overrun)
+	// Only show instructions to administrators as they are the only users
+	// able to make the necessary changes.
+	if ($post_overrun && $auth->acl_get('a_'))
 	{
 		$overrun_message .= '<br /><br />';
 		$overrun_message .= $user->lang['PHP_POST_OVERRUN_INSTRUCTIONS'];
