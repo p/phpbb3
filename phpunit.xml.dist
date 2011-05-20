@@ -25,7 +25,6 @@
 
     <filter>
         <blacklist>
-            <directory>./tests/</directory>
         </blacklist>
     </filter>
 </phpunit>

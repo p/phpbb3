@@ -977,6 +977,27 @@ class fileupload
 }
 
 /**
+* Calculates the largest allowed upload size.
+* phpBB has separate limits for attachments in posts and private messages;
+* the respective configuration parameters are max_filesize and
+* max_filesize_pm and one of them should be passed in as $config_key.
+* The effective upload size limit is the smaller of the applicable
+* phpBB limit, PHP post size limit and PHP upload file size limit.
+*
+* @param string $config_key Which configuration key to use for phpBB attachment size limit
+* @return string Human-readable upload size limit.
+*/
+function phpbb_format_effective_max_upload_size($config_key)
+{
+	global $config;
+	$phpbb_max_attachment_size = $config[$config_key];
+	$max_upload_size = @ini_get('upload_max_filesize');
+	$max_post_size = @ini_get('post_max_size');
+	$max_size = min($phpbb_max_attachment_size, $max_upload_size, $max_post_size);
+	return $max_size;
+}
+
+/**
 * Creates the message informing user of PHP upload size limit in effect.
 * This message is used when a user uploads a file exceeding the PHP upload limit.
 * If $include_post is true the PHP POST size limit is also included in the message.
