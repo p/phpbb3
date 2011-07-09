@@ -2127,6 +2127,84 @@ function get_avatar_filename($avatar_entry)
 	return $config['avatar_salt'] . '_' . (($avatar_group) ? 'g' : '') . $avatar_entry . '.' . $ext;
 }
 
+function phpbb_find_avatar_gallery_categories($avatar_gallery_path)
+{
+	$dp = @opendir($avatar_gallery_path);
+
+	if (!$dp)
+	{
+		return false;
+	}
+
+	$categories = array();
+	while (($file = readdir($dp)) !== false)
+	{
+		if ($file[0] != '.' && preg_match('#^[^&"\'<>]+$#i', $file) && is_dir("$avatar_gallery_path/$file"))
+		{
+			$categories[] = $file;
+		}
+	}
+	closedir($dp);
+
+	return $categories;
+}
+
+function phpbb_find_avatar_gallery_avatars($avatar_gallery_path)
+{
+	$categories = phpbb_find_avatar_gallery_categories($avatar_gallery_path);
+
+	$avatar_list = array();
+	foreach ($categories as $category)
+	{
+		if ($dp2 = @opendir("$avatar_gallery_path/$category"))
+		{
+			while (($sub_file = readdir($dp2)) !== false)
+			{
+				if (preg_match('#^[^&\'"<>]+\.(?:gif|png|jpe?g)$#i', $sub_file))
+				{
+					$avatar_list[$category][] = $sub_file;
+				}
+			}
+			closedir($dp2);
+		}
+	}
+
+	return $avatar_list;
+}
+
+function phpbb_prepare_avatar_gallery_view($avatar_list, $items_per_column)
+{
+	$avatars_for_display = array();
+	$categories_for_display = array();
+
+	foreach ($avatar_list as $category => $avatars)
+	{
+		$category_md5 = md5($category);
+		$row_count = $col_count = 0;
+
+		$categories_for_display[$category] = utf8_clean_string($category);
+
+		foreach ($avatars as $avatar)
+		{
+			$avatars_for_display[$category_md5][$row_count][$col_count] = array(
+				'file' => rawurlencode($category) . '/' . rawurlencode($avatar),
+				'filename' => rawurlencode($avatar),
+				'name' => ucfirst(str_replace('_', ' ', preg_replace('#^(.*)\..*$#', '\1', $avatar))),
+			);
+
+			$col_count++;
+			if ($col_count == $items_per_column)
+			{
+				$row_count++;
+				$col_count = 0;
+			}
+		}
+	}
+
+	asort($categories_for_display);
+	return array($categories_for_display, $avatars_for_display);
+}
+
 /**
 * Avatar Gallery
 */
@@ -2146,49 +2224,8 @@ function avatar_gallery($category, $avatar_select, $items_per_column, $block_var
 	}
 	else
 	{
-		// Collect images
-		$dp = @opendir($path);
-
-		if (!$dp)
-		{
-			return array($user->lang['NO_AVATAR_CATEGORY'] => array());
-		}
-
-		while (($file = readdir($dp)) !== false)
-		{
-			$file_md5 = md5($file);
-
-			if ($file[0] != '.' && preg_match('#^[^&"\'<>]+$#i', $file) && is_dir("$path/$file"))
-			{
-				$avatar_categories[$file] = utf8_clean_string($file);
-				$avatar_row_count = $avatar_col_count = 0;
-
-				if ($dp2 = @opendir("$path/$file"))
-				{
-					while (($sub_file = readdir($dp2)) !== false)
-					{
-						if (preg_match('#^[^&\'"<>]+\.(?:gif|png|jpe?g)$#i', $sub_file))
-						{
-							$avatar_list[$file_md5][$avatar_row_count][$avatar_col_count] = array(
-								'file'		=> rawurlencode($file) . '/' . rawurlencode($sub_file),
-								'filename'	=> rawurlencode($sub_file),
-								'name'		=> ucfirst(str_replace('_', ' ', preg_replace('#^(.*)\..*$#', '\1', $sub_file))),
-							);
-							$avatar_col_count++;
-							if ($avatar_col_count == $items_per_column)
-							{
-								$avatar_row_count++;
-								$avatar_col_count = 0;
-							}
-						}
-					}
-					closedir($dp2);
-				}
-			}
-		}
-		closedir($dp);
-
-		asort($avatar_categories);
+		$avatar_list = phpbb_find_avatar_gallery_avatars($path);
+		list($avatar_categories, $avatar_list) = phpbb_prepare_avatar_gallery_view($avatar_list, $items_per_column);
 	}
 
 	if (!sizeof($avatar_list))
@@ -2197,7 +2234,6 @@ function avatar_gallery($category, $avatar_select, $items_per_column, $block_var
 	}
 
 	$category = (!$category) ? key($avatar_list) : $category;
-	//var_dump($category);
 
 	$s_category_options = '';
 	foreach ($avatar_categories as $cat => $null)
