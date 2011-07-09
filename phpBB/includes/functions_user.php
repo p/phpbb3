@@ -2149,6 +2149,24 @@ function phpbb_find_avatar_gallery_categories($avatar_gallery_path)
 	return $categories;
 }
 
+function phpbb_find_avatar_category_avatars($avatar_gallery_path, $category)
+{
+	$avatar_list = array();
+	if ($dp2 = @opendir("$avatar_gallery_path/$category"))
+	{
+		while (($sub_file = readdir($dp2)) !== false)
+		{
+			if (preg_match('#^[^&\'"<>]+\.(?:gif|png|jpe?g)$#i', $sub_file))
+			{
+				$avatar_list[] = $sub_file;
+			}
+		}
+		closedir($dp2);
+	}
+
+	return $avatar_list;
+}
+
 function phpbb_find_avatar_gallery_avatars($avatar_gallery_path)
 {
 	$categories = phpbb_find_avatar_gallery_categories($avatar_gallery_path);
@@ -2156,16 +2174,10 @@ function phpbb_find_avatar_gallery_avatars($avatar_gallery_path)
 	$avatar_list = array();
 	foreach ($categories as $category)
 	{
-		if ($dp2 = @opendir("$avatar_gallery_path/$category"))
+		$avatars = phpbb_find_avatar_category_avatars($avatar_gallery_path, $category);
+		if (sizeof($avatars))
 		{
-			while (($sub_file = readdir($dp2)) !== false)
-			{
-				if (preg_match('#^[^&\'"<>]+\.(?:gif|png|jpe?g)$#i', $sub_file))
-				{
-					$avatar_list[$category][] = $sub_file;
-				}
-			}
-			closedir($dp2);
+			$avatar_list[$category] = $avatars;
 		}
 	}
 
@@ -2384,21 +2396,41 @@ function avatar_process_user(&$error, $custom_userdata = false, $can_upload = nu
 	}
 	else if ($avatar_select && $change_avatar && $config['allow_avatar_local'])
 	{
-		$category = basename(request_var('category', ''));
+		$avatar_gallery_path = $phpbb_root_path . $config['avatar_gallery_path'];
 
-		$sql_ary['user_avatar_type'] = AVATAR_GALLERY;
-		$sql_ary['user_avatar'] = $avatar_select;
+		$selected_category_hash = request_var('category', '');
+		$categories = phpbb_find_avatar_gallery_categories($avatar_gallery_path);
+		$found = false;
+		foreach ($categories as $category)
+		{
+			if (md5($category) == $selected_category_hash)
+			{
+				$found = true;
+				$selected_category = $category;
+				break;
+			}
+		}
+		if ($found)
+		{
+			$avatars = phpbb_find_avatar_category_avatars($avatar_gallery_path, $selected_category);
+			if (in_array($avatar_select, $avatars))
+			{
+				$sql_ary['user_avatar_type'] = AVATAR_GALLERY;
+				$sql_ary['user_avatar'] = $avatar_select;
+				list($sql_ary['user_avatar_width'], $sql_ary['user_avatar_height']) =
+					getimagesize($avatar_gallery_path . '/' . $category . '/' . urldecode($sql_ary['user_avatar']));
+				$sql_ary['user_avatar'] = $selected_category . '/' . $sql_ary['user_avatar'];
+			}
+			else
+			{
+				$found = false;
+			}
+		}
 
-		// check avatar gallery
-		if (!is_dir($phpbb_root_path . $config['avatar_gallery_path'] . '/' . $category))
+		if (!$found)
 		{
 			$sql_ary['user_avatar'] = '';
 			$sql_ary['user_avatar_type'] = $sql_ary['user_avatar_width'] = $sql_ary['user_avatar_height'] = 0;
-		}
-		else
-		{
-			list($sql_ary['user_avatar_width'], $sql_ary['user_avatar_height']) = getimagesize($phpbb_root_path . $config['avatar_gallery_path'] . '/' . $category . '/' . urldecode($sql_ary['user_avatar']));
-			$sql_ary['user_avatar'] = $category . '/' . $sql_ary['user_avatar'];
 		}
 	}
 	else if (isset($_POST['delete']) && $change_avatar)
