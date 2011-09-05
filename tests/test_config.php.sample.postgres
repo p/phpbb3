@@ -1,0 +1,8 @@
+<?php
+
+$dbms = 'postgres';
+$dbhost = 'localhost';
+$dbport = '';
+$dbname = 'phpbb_test';
+$dbuser = 'phpbb_test';
+$dbpasswd = '';
