@@ -242,9 +242,24 @@ function display_forums($root_data = '', $display_moderators = true, $return_mod
 			$subforums[$parent_id][$forum_id]['orig_forum_last_post_time'] = $row['forum_last_post_time'];
 			$subforums[$parent_id][$forum_id]['children'] = array();
 
-			if (isset($subforums[$parent_id][$row['parent_id']]) && !$row['display_on_index'])
+			// Only grab this data if we actually display subforums
+			if ($forum_rows[$parent_id]['display_subforum_list'])
 			{
-				$subforums[$parent_id][$row['parent_id']]['children'][] = $forum_id;
+				if (isset($subforums[$parent_id][$row['parent_id']]) && !$row['display_on_index'])
+				{
+					$subforums[$parent_id][$row['parent_id']]['children'][] = $forum_id;
+				}
+				else if (!$row['display_on_index'] && !empty($row['forum_parents']))
+				{
+					// Handle nested sub forums
+					foreach (unserialize($row['forum_parents']) as $sub_forum_parent_id => $void)
+					{
+						if (isset($subforums[$parent_id][$sub_forum_parent_id]))
+						{
+							$subforums[$parent_id][$sub_forum_parent_id]['children'][] = $forum_id;
+						}
+					}
+				}
 			}
 
 			if (!$forum_rows[$parent_id]['forum_id_unapproved_topics'] && $row['forum_id_unapproved_topics'])
