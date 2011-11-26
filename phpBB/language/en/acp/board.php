@@ -138,6 +138,8 @@ $lang = array_merge($lang, array(
 	'HOLD_NEW_MESSAGES'			=> 'Hold new messages',
 	'PM_EDIT_TIME'				=> 'Limit editing time',
 	'PM_EDIT_TIME_EXPLAIN'		=> 'Limits the time available to edit a private message not already delivered. Setting the value to 0 disables this behaviour.',
+	'PM_FLOOD_INTERVAL'			=> 'Message Flood interval',
+	'PM_FLOOD_INTERVAL_EXPLAIN'	=> 'Number of seconds a user must wait between sending another private message. To enable users to ignore this alter their permissions.',
 	'PM_MAX_RECIPIENTS'			=> 'Maximum number of allowed recipients',
 	'PM_MAX_RECIPIENTS_EXPLAIN'	=> 'The maximum number of allowed recipients in a private message. If 0 is entered, an unlimited number is allowed. This setting can be adjusted for every group within the group settings page.',
 ));

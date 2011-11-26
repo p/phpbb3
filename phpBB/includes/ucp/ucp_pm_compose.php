@@ -687,14 +687,14 @@ function compose_pm($id, $mode, $action, $user_folders = array())
 			$error[] = implode('<br />', $message_parser->warn_msg);
 		}
 
-		if ($action != 'edit' && !$preview && !$refresh && $config['flood_interval'] && !$auth->acl_get('u_ignoreflood'))
+		if ($action != 'edit' && !$preview && !$refresh && $config['pm_flood_interval'] && !$auth->acl_get('u_ignoreflood'))
 		{
 			// Flood check
 			$last_post_time = $user->data['user_lastpost_time'];
 
 			if ($last_post_time)
 			{
-				if ($last_post_time && ($current_time - $last_post_time) < intval($config['flood_interval']))
+				if ($last_post_time && ($current_time - $last_post_time) < intval($config['pm_flood_interval']))
 				{
 					$error[] = $user->lang['FLOOD_ERROR'];
 				}

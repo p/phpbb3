@@ -439,6 +439,7 @@ class phpbb_questionnaire_phpbb_data_provider
 			'override_user_style' => true,
 			'pass_complex' => true,
 			'pm_edit_time' => true,
+			'pm_flood_interval' => true,
 			'pm_max_boxes' => true,
 			'pm_max_msgs' => true,
 			'pm_max_recipients' => true,

@@ -1637,6 +1637,11 @@ function change_database_data(&$no_updates, $version)
 				set_config('delete_time', $config['edit_time']);
 			}
 
+			if (!isset($config['pm_flood_interval']))
+			{
+				set_config('pm_flood_interval', '180');
+			}
+
 			$no_updates = false;
 		break;
 
