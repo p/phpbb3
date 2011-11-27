@@ -97,6 +97,7 @@ $lang = array_merge($lang, array(
 	'FLASH_IS_OFF'				=> '[flash] is <em>OFF</em>',
 	'FLASH_IS_ON'				=> '[flash] is <em>ON</em>',
 	'FLOOD_ERROR'				=> 'You cannot make another post so soon after your last.',
+	'FLOOD_ERROR_PM'			=> 'You cannot send another message so soon after your last.',
 	'FONT_COLOR'				=> 'Font colour',
 	'FONT_COLOR_HIDE'			=> 'Hide font colour',
 	'FONT_HUGE'					=> 'Huge',

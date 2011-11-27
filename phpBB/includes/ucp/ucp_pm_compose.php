@@ -696,7 +696,7 @@ function compose_pm($id, $mode, $action, $user_folders = array())
 			{
 				if ($last_post_time && ($current_time - $last_post_time) < intval($config['pm_flood_interval']))
 				{
-					$error[] = $user->lang['FLOOD_ERROR'];
+					$error[] = $user->lang['FLOOD_ERROR_PM'];
 				}
 			}
 		}
