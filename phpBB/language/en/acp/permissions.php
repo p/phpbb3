@@ -171,7 +171,7 @@ $lang = array_merge($lang, array(
 	'ROLE_FORUM_POLLS'			=> 'Standard Access + Polls',
 	'ROLE_FORUM_READONLY'		=> 'Read Only Access',
 	'ROLE_FORUM_STANDARD'		=> 'Standard Access',
-	'ROLE_FORUM_NEW_MEMBER'		=> 'Newly registered User',
+	'ROLE_FORUM_NEW_MEMBER'		=> 'New Users with post approval',
 	'ROLE_MOD_FULL'				=> 'Full Moderator',
 	'ROLE_MOD_QUEUE'			=> 'Queue Moderator',
 	'ROLE_MOD_SIMPLE'			=> 'Simple Moderator',
@@ -181,7 +181,7 @@ $lang = array_merge($lang, array(
 	'ROLE_USER_NOAVATAR'		=> 'No Avatar',
 	'ROLE_USER_NOPM'			=> 'No Private Messages',
 	'ROLE_USER_STANDARD'		=> 'Standard Features',
-	'ROLE_USER_NEW_MEMBER'		=> 'Newly registered User',
+	'ROLE_USER_NEW_MEMBER'		=> 'New Users with no private messages and attachments',
 
 
 	'ROLE_DESCRIPTION_ADMIN_FORUM'			=> 'Can access the forum management and forum permission settings.',
@@ -197,7 +197,7 @@ $lang = array_merge($lang, array(
 	'ROLE_DESCRIPTION_FORUM_POLLS'			=> 'Like Standard Access but can also create polls.',
 	'ROLE_DESCRIPTION_FORUM_READONLY'		=> 'Can read the forum, but cannot create new topics or reply to posts.',
 	'ROLE_DESCRIPTION_FORUM_STANDARD'		=> 'Can use most forum features including attachments and deleting own topics, but cannot lock own topics, and cannot create polls.',
-	'ROLE_DESCRIPTION_FORUM_NEW_MEMBER'		=> 'A role for members of the special newly registered users group; contains <samp>NEVER</samp> permissions to lock features for new users.',
+	'ROLE_DESCRIPTION_FORUM_NEW_MEMBER'		=> 'A forum based role for members of the special newly registered users group; contains <samp>NEVER</samp> contains NEVER permissions not allowing post to appear without approval for new users.',
 	'ROLE_DESCRIPTION_MOD_FULL'				=> 'Can use all moderating features, including banning.',
 	'ROLE_DESCRIPTION_MOD_QUEUE'			=> 'Can use the Moderation Queue to validate and edit posts, but nothing else.',
 	'ROLE_DESCRIPTION_MOD_SIMPLE'			=> 'Can only use basic topic actions. Cannot send warnings or use moderation queue.',
@@ -207,7 +207,7 @@ $lang = array_merge($lang, array(
 	'ROLE_DESCRIPTION_USER_NOAVATAR'		=> 'Has a limited feature set and is not allowed to use the Avatar feature.',
 	'ROLE_DESCRIPTION_USER_NOPM'			=> 'Has a limited feature set, and is not allowed to use Private Messages.',
 	'ROLE_DESCRIPTION_USER_STANDARD'		=> 'Can access most but not all user features. Cannot change user name or ignore the flood limit, for instance.',
-	'ROLE_DESCRIPTION_USER_NEW_MEMBER'		=> 'A role for members of the special newly registered users group; contains <samp>NEVER</samp> permissions to lock features for new users.',
+	'ROLE_DESCRIPTION_USER_NEW_MEMBER'		=> 'A user based role for members of the special newly registered users group; contains <samp>NEVER</samp> permissions to lock private messages and attachments for new users.',
 
 	'ROLE_DESCRIPTION_EXPLAIN'		=> 'You are able to enter a short explanation of what the role is doing or for what it is meant for. The text you enter here will be displayed within the permissions screens too.',
 	'ROLE_DESCRIPTION_LONG'			=> 'The role description is too long, please limit it to 4000 characters.',
