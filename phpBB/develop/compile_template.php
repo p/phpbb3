@@ -1,7 +1,6 @@
 <?php
 // -------------------------------------------------------------
 //
-// $Id$
 //
 // FILENAME  : compile_template.php
 // STARTED   : Sun Apr 24, 2011

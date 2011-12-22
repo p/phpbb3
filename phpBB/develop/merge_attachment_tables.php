@@ -1,7 +1,6 @@
 <?php
 // -------------------------------------------------------------
 //
-// $Id$
 //
 // FILENAME  : merge_attachment_tables.php
 // STARTED   : Tue Nov 04, 2003
