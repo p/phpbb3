@@ -1,7 +1,6 @@
 <?php
 // -------------------------------------------------------------
 //
-//
 // FILENAME  : compile_template.php
 // STARTED   : Sun Apr 24, 2011
 // COPYRIGHT : © 2011 phpBB Group

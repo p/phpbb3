@@ -15,7 +15,6 @@ die("Please read the first lines of this script for instructions on how to enabl
 
 // -------------------------------------------------------------
 //
-//
 // @copyright (c) 2005 phpBB Group 
 // @license http://opensource.org/licenses/gpl-2.0.php GNU General Public License 
 // 

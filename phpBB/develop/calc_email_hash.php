@@ -1,7 +1,6 @@
 <?php
 // -------------------------------------------------------------
 //
-//
 // FILENAME  : calc_email_hash.php
 // STARTED   : Tue Feb 03, 2004
 // COPYRIGHT : © 2004 phpBB Group

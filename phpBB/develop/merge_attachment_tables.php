@@ -1,7 +1,6 @@
 <?php
 // -------------------------------------------------------------
 //
-//
 // FILENAME  : merge_attachment_tables.php
 // STARTED   : Tue Nov 04, 2003
 // COPYRIGHT : © 2001, 2003 phpBB Group
