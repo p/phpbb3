@@ -1568,7 +1568,7 @@ parse_css_file = {PARSE_CSS_FILE}
 			'PATH'				=> $imageset_path,
 			'A_PATH'			=> addslashes($imageset_path),
 			'ERROR'				=> !$valid_name,
-			'IMG_SRC'			=> ($image_found) ? '../styles/' . $imageset_path . '/imageset/' . $img_val : 'images/no_image.png',
+			'IMG_SRC'			=> ($image_found) ? '../styles/' . rawurlencode($imageset_path) . '/imageset/' . $img_val : 'images/no_image.png',
 			'IMAGE_SELECT'		=> $image_found
 		));
 	}
