@@ -273,7 +273,7 @@ class acp_bbcodes
 						$db->sql_query('DELETE FROM ' . BBCODES_TABLE . " WHERE bbcode_id = $bbcode_id");
 						$cache->destroy('sql', BBCODES_TABLE);
 						add_log('admin', 'LOG_BBCODE_DELETE', $row['bbcode_tag']);
-						
+
 						if ($request->is_ajax())
 						{
 							$json_response = new phpbb_json_response;

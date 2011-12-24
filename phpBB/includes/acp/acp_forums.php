@@ -256,7 +256,7 @@ class acp_forums
 					add_log('admin', 'LOG_FORUM_' . strtoupper($action), $row['forum_name'], $move_forum_name);
 					$cache->destroy('sql', FORUMS_TABLE);
 				}
-				
+
 				if ($request->is_ajax())
 				{
 					$json_response = new phpbb_json_response;

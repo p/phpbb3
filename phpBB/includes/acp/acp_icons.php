@@ -783,7 +783,7 @@ class acp_icons
 
 					$cache->destroy('_icons');
 					$cache->destroy('sql', $table);
-					
+
 					if ($request->is_ajax())
 					{
 						$json_response = new phpbb_json_response;
