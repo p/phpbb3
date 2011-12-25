@@ -96,6 +96,15 @@ class phpbb_database_test_connection_manager
 		// good for debug
 		// $this->pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 	}
+        
+        public function disconnect() {
+                if ($this->pdo) {
+                        // This is how you tell pdo to disconnect from database -
+                        // no joke. http://code.google.com/p/digg/wiki/PDB
+                        // Hopefully noone else has references to the pdo instance.
+                        $this->pdo = null;
+                }
+        }
 
 	/**
 	* Load the phpBB database schema into the database
