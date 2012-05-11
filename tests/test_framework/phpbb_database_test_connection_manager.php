@@ -10,6 +10,74 @@
 require_once dirname(__FILE__) . '/../../phpBB/includes/functions_install.php';
 require_once dirname(__FILE__) . '/phpbb_database_connection_odbc_pdo_wrapper.php';
 
+interface phpbb_sql_dialect
+{
+	public function list_tables_sql();
+}
+
+class phpbb_sql_dialect_mysql implements phpbb_sql_dialect
+{
+	public function list_tables_sql()
+	{
+		$sql = 'SHOW TABLES';
+		return $sql;
+	}
+}
+
+class phpbb_sql_dialect_postgres implements phpbb_sql_dialect
+{
+	public function list_tables_sql()
+	{
+		$sql = 'SELECT relname
+			FROM pg_stat_user_tables';
+		return $sql;
+	}
+}
+
+class phpbb_sql_dialect_sqlite implements phpbb_sql_dialect
+{
+	public function list_tables_sql()
+	{
+		$sql = 'SELECT name
+			FROM sqlite_master
+			WHERE type = "table"';
+		return $sql;
+	}
+}
+
+class phpbb_sql_dialect_firebird implements phpbb_sql_dialect
+{
+	public function list_tables_sql()
+	{
+		$sql = 'SELECT rdb$relation_name
+			FROM rdb$relations
+			WHERE rdb$view_source is null
+				AND rdb$system_flag = 0';
+		return $sql;
+	}
+}
+
+class phpbb_sql_dialect_mssql implements phpbb_sql_dialect
+{
+	public function list_tables_sql()
+	{
+		$sql = "SELECT name
+			FROM sysobjects
+			WHERE type='U'";
+		return $sql;
+	}
+}
+
+class phpbb_sql_dialect_oracle implements phpbb_sql_dialect
+{
+	public function list_tables_sql()
+	{
+		$sql = 'SELECT table_name
+			FROM USER_TABLES';
+		return $sql;
+	}
+}
+
 class phpbb_database_test_connection_manager
 {
 	private $config;
@@ -34,6 +102,41 @@ class phpbb_database_test_connection_manager
 	public function get_pdo()
 	{
 		return $this->pdo;
+	}
+
+	public function get_dialect_for_dbms($dbms)
+	{
+		switch ($dbms)
+		{
+			case 'mysql':
+			case 'mysql4':
+			case 'mysqli':
+				$dialect = 'mysql';
+			break;
+
+			case 'sqlite':
+				$dialect = 'sqlite';
+			break;
+
+			case 'mssql':
+			case 'mssql_odbc':
+			case 'mssqlnative':
+				$dialect = 'mssql';
+			break;
+
+			case 'postgres':
+				$dialect = 'postgres';
+			break;
+
+			case 'firebird':
+				$dialect = 'firebird';
+			break;
+
+			case 'oracle':
+				$dialect = 'oracle';
+			break;
+		}
+		return $dialect;
 	}
 
 	/**
@@ -127,6 +230,10 @@ class phpbb_database_test_connection_manager
 		}
 
 		$this->pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
+		$dialect = $this->get_dialect_for_dbms($this->config['dbms']);
+		$dialect_cls = "phpbb_sql_dialect_$dialect";
+		$this->dialect = new $dialect_cls;
 	}
 
 	/**
@@ -215,45 +322,7 @@ class phpbb_database_test_connection_manager
 	{
 		$this->ensure_connected(__METHOD__);
 
-		switch ($this->config['dbms'])
-		{
-			case 'mysql':
-			case 'mysql4':
-			case 'mysqli':
-				$sql = 'SHOW TABLES';
-			break;
-
-			case 'sqlite':
-				$sql = 'SELECT name
-					FROM sqlite_master
-					WHERE type = "table"';
-			break;
-
-			case 'mssql':
-			case 'mssql_odbc':
-			case 'mssqlnative':
-				$sql = "SELECT name
-					FROM sysobjects
-					WHERE type='U'";
-			break;
-
-			case 'postgres':
-				$sql = 'SELECT relname
-					FROM pg_stat_user_tables';
-			break;
-
-			case 'firebird':
-				$sql = 'SELECT rdb$relation_name
-					FROM rdb$relations
-					WHERE rdb$view_source is null
-						AND rdb$system_flag = 0';
-			break;
-
-			case 'oracle':
-				$sql = 'SELECT table_name
-					FROM USER_TABLES';
-			break;
-		}
+		$sql = $this->dialect->list_tables_sql();
 
 		$result = $this->pdo->query($sql);
 
@@ -284,7 +353,7 @@ class phpbb_database_test_connection_manager
 	protected function load_schema_from_file($directory)
 	{
 		$schema = $this->dbms['SCHEMA'];
-		
+
 		if ($this->config['dbms'] == 'mysql')
 		{
 			$sth = $this->pdo->query('SELECT VERSION() AS version');
@@ -304,7 +373,7 @@ class phpbb_database_test_connection_manager
 
 		$queries = file_get_contents($filename);
 		$sql = remove_comments($queries);
-		
+
 		$sql = split_sql_file($sql, $this->dbms['DELIM']);
 
 		foreach ($sql as $query)
