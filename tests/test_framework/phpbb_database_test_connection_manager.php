@@ -13,6 +13,8 @@ require_once dirname(__FILE__) . '/phpbb_database_connection_odbc_pdo_wrapper.ph
 interface phpbb_sql_dialect
 {
 	public function list_tables_sql();
+	public function list_sequences_sql();
+	public function drop_sequence_sql($sequence);
 }
 
 class phpbb_sql_dialect_mysql implements phpbb_sql_dialect
@@ -21,6 +23,16 @@ class phpbb_sql_dialect_mysql implements phpbb_sql_dialect
 	{
 		$sql = 'SHOW TABLES';
 		return $sql;
+	}
+
+	public function list_sequences_sql()
+	{
+		trigger_error('Listing sequences is not implemented for mysql', E_USER_ERROR);
+	}
+
+	public function drop_sequence_sql($sequence)
+	{
+		trigger_error('Dropping sequences is not implemented for mysql', E_USER_ERROR);
 	}
 }
 
@@ -32,6 +44,16 @@ class phpbb_sql_dialect_postgres implements phpbb_sql_dialect
 			FROM pg_stat_user_tables';
 		return $sql;
 	}
+
+	public function list_sequences_sql()
+	{
+		trigger_error('Listing sequences is not implemented for postgres', E_USER_ERROR);
+	}
+
+	public function drop_sequence_sql($sequence)
+	{
+		trigger_error('Dropping sequences is not implemented for postgres', E_USER_ERROR);
+	}
 }
 
 class phpbb_sql_dialect_sqlite implements phpbb_sql_dialect
@@ -42,6 +64,16 @@ class phpbb_sql_dialect_sqlite implements phpbb_sql_dialect
 			FROM sqlite_master
 			WHERE type = "table"';
 		return $sql;
+	}
+
+	public function list_sequences_sql()
+	{
+		trigger_error('Listing sequences is not implemented for sqlite', E_USER_ERROR);
+	}
+
+	public function drop_sequence_sql($sequence)
+	{
+		trigger_error('Dropping sequences is not implemented for sqlite', E_USER_ERROR);
 	}
 }
 
@@ -55,6 +87,20 @@ class phpbb_sql_dialect_firebird implements phpbb_sql_dialect
 				AND rdb$system_flag = 0';
 		return $sql;
 	}
+
+	public function list_sequences_sql()
+	{
+		$sql = 'SELECT RDB$GENERATOR_NAME
+			FROM RDB$GENERATORS
+			WHERE RDB$SYSTEM_FLAG = 0';
+		return $sql;
+	}
+
+	public function drop_sequence_sql($sequence)
+	{
+		$sql = "DROP GENERATOR $sequence";
+		return $sql;
+	}
 }
 
 class phpbb_sql_dialect_mssql implements phpbb_sql_dialect
@@ -66,6 +112,16 @@ class phpbb_sql_dialect_mssql implements phpbb_sql_dialect
 			WHERE type='U'";
 		return $sql;
 	}
+
+	public function list_sequences_sql()
+	{
+		trigger_error('Listing sequences is not implemented for mssql', E_USER_ERROR);
+	}
+
+	public function drop_sequence_sql($sequence)
+	{
+		trigger_error('Dropping sequences is not implemented for mssql', E_USER_ERROR);
+	}
 }
 
 class phpbb_sql_dialect_oracle implements phpbb_sql_dialect
@@ -74,6 +130,19 @@ class phpbb_sql_dialect_oracle implements phpbb_sql_dialect
 	{
 		$sql = 'SELECT table_name
 			FROM USER_TABLES';
+		return $sql;
+	}
+
+	public function list_sequences_sql()
+	{
+		$sql = 'SELECT sequence_name
+			FROM USER_SEQUENCES';
+		return $sql;
+	}
+
+	public function drop_sequence_sql($sequence)
+	{
+		$sql = "DROP SEQUENCE $sequence";
 		return $sql;
 	}
 }
@@ -458,25 +527,13 @@ class phpbb_database_test_connection_manager
 		switch ($this->config['dbms'])
 		{
 			case 'firebird':
-				$sql = 'SELECT RDB$GENERATOR_NAME
-					FROM RDB$GENERATORS
-					WHERE RDB$SYSTEM_FLAG = 0';
-				$result = $this->pdo->query($sql);
-
-				while ($row = $result->fetch(PDO::FETCH_NUM))
-				{
-					$queries[] = 'DROP GENERATOR ' . current($row);
-				}
-			break;
-
 			case 'oracle':
-				$sql = 'SELECT sequence_name
-					FROM USER_SEQUENCES';
+				$sql = $this->dialect->list_sequences_sql();
 				$result = $this->pdo->query($sql);
 
 				while ($row = $result->fetch(PDO::FETCH_NUM))
 				{
-					$queries[] = 'DROP SEQUENCE ' . current($row);
+					$queries[] = $this->dialect->drop_sequence_sql(current($row));
 				}
 			break;
 		}
