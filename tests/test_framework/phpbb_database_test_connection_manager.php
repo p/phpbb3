@@ -13,6 +13,7 @@ require_once dirname(__FILE__) . '/phpbb_database_connection_odbc_pdo_wrapper.ph
 interface phpbb_sql_dialect
 {
 	public function list_tables_sql();
+	public function drop_table_cascade_sql($table);
 	public function has_sequences();
 	public function implicitly_cascades_to_sequences();
 	public function list_sequences_sql();
@@ -24,6 +25,12 @@ class phpbb_sql_dialect_mysql implements phpbb_sql_dialect
 	public function list_tables_sql()
 	{
 		$sql = 'SHOW TABLES';
+		return $sql;
+	}
+
+	public function drop_table_cascade_sql($table)
+	{
+		$sql = "DROP TABLE $table CASCADE";
 		return $sql;
 	}
 
@@ -54,6 +61,12 @@ class phpbb_sql_dialect_postgres implements phpbb_sql_dialect
 	{
 		$sql = 'SELECT relname
 			FROM pg_stat_user_tables';
+		return $sql;
+	}
+
+	public function drop_table_cascade_sql($table)
+	{
+		$sql = "DROP TABLE $table CASCADE";
 		return $sql;
 	}
 
@@ -88,6 +101,14 @@ class phpbb_sql_dialect_sqlite implements phpbb_sql_dialect
 		return $sql;
 	}
 
+	# sqlite has no drop table cascade:
+	# http://sqlite.org/lang_droptable.html
+	public function drop_table_cascade_sql($table)
+	{
+		$sql = "DROP TABLE $table";
+		return $sql;
+	}
+
 	public function has_sequences()
 	{
 		return false;
@@ -117,6 +138,14 @@ class phpbb_sql_dialect_firebird implements phpbb_sql_dialect
 			FROM rdb$relations
 			WHERE rdb$view_source is null
 				AND rdb$system_flag = 0';
+		return $sql;
+	}
+
+	# firebird has no drop table cascade:
+	# http://tracker.firebirdsql.org/browse/CORE-695
+	public function drop_table_cascade_sql($table)
+	{
+		$sql = "DROP TABLE $table";
 		return $sql;
 	}
 
@@ -155,6 +184,14 @@ class phpbb_sql_dialect_mssql implements phpbb_sql_dialect
 		return $sql;
 	}
 
+	# mssql has no drop table cascade:
+	# http://stackoverflow.com/questions/4858488/sql-server-drop-table-cascade-equivalent
+	public function drop_table_cascade_sql($table)
+	{
+		$sql = "DROP TABLE $table";
+		return $sql;
+	}
+
 	public function has_sequences()
 	{
 		return false;
@@ -182,6 +219,12 @@ class phpbb_sql_dialect_oracle implements phpbb_sql_dialect
 	{
 		$sql = 'SELECT table_name
 			FROM USER_TABLES';
+		return $sql;
+	}
+
+	public function drop_table_cascade_sql($table)
+	{
+		$sql = "DROP TABLE $table CASCADE CONSTRAINTS";
 		return $sql;
 	}
 
@@ -410,7 +453,8 @@ class phpbb_database_test_connection_manager
 				// Drop all of the tables
 				foreach ($this->get_tables() as $table)
 				{
-					$this->pdo->exec('DROP TABLE ' . $table . ' CASCADE CONSTRAINTS');
+					$sql = $this->dialect->drop_table_cascade_sql($table);
+					$this->pdo->exec($sql);
 				}
 				$this->purge_extras();
 			break;
