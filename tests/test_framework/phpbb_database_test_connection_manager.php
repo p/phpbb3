@@ -13,6 +13,8 @@ require_once dirname(__FILE__) . '/phpbb_database_connection_odbc_pdo_wrapper.ph
 interface phpbb_sql_dialect
 {
 	public function list_tables_sql();
+	public function has_sequences();
+	public function implicitly_cascades_to_sequences();
 	public function list_sequences_sql();
 	public function drop_sequence_sql($sequence);
 }
@@ -23,6 +25,16 @@ class phpbb_sql_dialect_mysql implements phpbb_sql_dialect
 	{
 		$sql = 'SHOW TABLES';
 		return $sql;
+	}
+
+	public function has_sequences()
+	{
+		return false;
+	}
+
+	public function implicitly_cascades_to_sequences()
+	{
+		return false;
 	}
 
 	public function list_sequences_sql()
@@ -43,6 +55,16 @@ class phpbb_sql_dialect_postgres implements phpbb_sql_dialect
 		$sql = 'SELECT relname
 			FROM pg_stat_user_tables';
 		return $sql;
+	}
+
+	public function has_sequences()
+	{
+		return true;
+	}
+
+	public function implicitly_cascades_to_sequences()
+	{
+		return true;
 	}
 
 	public function list_sequences_sql()
@@ -66,6 +88,16 @@ class phpbb_sql_dialect_sqlite implements phpbb_sql_dialect
 		return $sql;
 	}
 
+	public function has_sequences()
+	{
+		return false;
+	}
+
+	public function implicitly_cascades_to_sequences()
+	{
+		return false;
+	}
+
 	public function list_sequences_sql()
 	{
 		trigger_error('Listing sequences is not implemented for sqlite', E_USER_ERROR);
@@ -86,6 +118,16 @@ class phpbb_sql_dialect_firebird implements phpbb_sql_dialect
 			WHERE rdb$view_source is null
 				AND rdb$system_flag = 0';
 		return $sql;
+	}
+
+	public function has_sequences()
+	{
+		return true;
+	}
+
+	public function implicitly_cascades_to_sequences()
+	{
+		return false;
 	}
 
 	public function list_sequences_sql()
@@ -113,6 +155,16 @@ class phpbb_sql_dialect_mssql implements phpbb_sql_dialect
 		return $sql;
 	}
 
+	public function has_sequences()
+	{
+		return false;
+	}
+
+	public function implicitly_cascades_to_sequences()
+	{
+		return false;
+	}
+
 	public function list_sequences_sql()
 	{
 		trigger_error('Listing sequences is not implemented for mssql', E_USER_ERROR);
@@ -131,6 +183,16 @@ class phpbb_sql_dialect_oracle implements phpbb_sql_dialect
 		$sql = 'SELECT table_name
 			FROM USER_TABLES';
 		return $sql;
+	}
+
+	public function has_sequences()
+	{
+		return true;
+	}
+
+	public function implicitly_cascades_to_sequences()
+	{
+		return false;
 	}
 
 	public function list_sequences_sql()
@@ -524,18 +586,15 @@ class phpbb_database_test_connection_manager
 		$this->ensure_connected(__METHOD__);
 		$queries = array();
 
-		switch ($this->config['dbms'])
+		if ($this->dialect->has_sequences() && !$this->dialect->implicitly_cascades_to_sequences())
 		{
-			case 'firebird':
-			case 'oracle':
-				$sql = $this->dialect->list_sequences_sql();
-				$result = $this->pdo->query($sql);
+			$sql = $this->dialect->list_sequences_sql();
+			$result = $this->pdo->query($sql);
 
-				while ($row = $result->fetch(PDO::FETCH_NUM))
-				{
-					$queries[] = $this->dialect->drop_sequence_sql(current($row));
-				}
-			break;
+			while ($row = $result->fetch(PDO::FETCH_NUM))
+			{
+				$queries[] = $this->dialect->drop_sequence_sql(current($row));
+			}
 		}
 
 		foreach ($queries as $query)
