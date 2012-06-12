@@ -75,12 +75,6 @@ class phpbb_template
 	private $locator;
 
 	/**
-	* Location of templates directory within style directories
-	* @var string
-	*/
-	public $template_path = 'template/';
-
-	/**
 	* Constructor.
 	*
 	* @param string $phpbb_root_path phpBB root path
@@ -94,7 +88,6 @@ class phpbb_template
 		$this->config = $config;
 		$this->user = $user;
 		$this->locator = $locator;
-		$this->template_path = $this->locator->template_path;
 		$this->context = new phpbb_template_context();
 	}
 
