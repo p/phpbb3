@@ -71,9 +71,8 @@ class phpbb_style
 	* @param user $user current user
 	* @param phpbb_style_resource_locator $locator style resource locator
 	* @param phpbb_style_path_provider $provider style path provider
-	* @param phpbb_template $template template
 	*/
-	public function __construct($phpbb_root_path, $phpEx, $config, $user, phpbb_style_resource_locator $locator, phpbb_style_path_provider_interface $provider, phpbb_template $template)
+	public function __construct($phpbb_root_path, $phpEx, $config, $user, phpbb_style_resource_locator $locator, phpbb_style_path_provider_interface $provider)
 	{
 		$this->phpbb_root_path = $phpbb_root_path;
 		$this->phpEx = $phpEx;
@@ -81,7 +80,7 @@ class phpbb_style
 		$this->user = $user;
 		$this->locator = $locator;
 		$this->provider = $provider;
-		$this->template = $template;
+		$this->template = new phpbb_template($this->phpbb_root_path, $this->phpEx, $this->config, $this->user, $this->locator);
 	}
 
 	/**
@@ -182,5 +181,18 @@ class phpbb_style
 
 		// use resource locator to find files
 		return $this->locator->get_first_file_location($files, $return_default, $return_full_path);
+	}
+
+	/**
+	* Obtains the template object.
+	*
+	* The template object is configured to use template files from
+	* the style as specified in style class instance, etc.
+	*
+	* @return phpbb_template Template object
+	*/
+	public function get_template()
+	{
+		return $this->template;
 	}
 }
