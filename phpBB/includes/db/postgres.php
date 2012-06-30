@@ -161,8 +161,8 @@ class dbal_postgres extends dbal
 	{
 		// To ensure, that both expressions have the same type, we cast them to text manually
 		$sql_case = 'CASE WHEN ' . $condition;
-		$sql_case .= ' THEN CAST(' . $action_true . ' AS TEXT)';
-		$sql_case .= ($action_false !== false) ? ' ELSE CAST(' . $action_false . ' AS TEXT)' : '';
+		$sql_case .= ' THEN ' . $action_true;
+		$sql_case .= ($action_false !== false) ? ' ELSE ' . $action_false  : '';
 		$sql_case .= ' END';
 		return $sql_case;
 	}
