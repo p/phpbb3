@@ -250,7 +250,7 @@ class install_install extends module
 			'S_EXPLAIN'		=> true,
 			'S_LEGEND'		=> false,
 		));
-		
+
 		// Check for php json support
 		if (@extension_loaded('json'))
 		{
@@ -1967,7 +1967,7 @@ class install_install extends module
 		'admin_name'			=> array('lang' => 'ADMIN_USERNAME',			'type' => 'text:25:100', 'explain' => true),
 		'admin_pass1'			=> array('lang' => 'ADMIN_PASSWORD',			'type' => 'password:25:100', 'explain' => true),
 		'admin_pass2'			=> array('lang' => 'ADMIN_PASSWORD_CONFIRM',	'type' => 'password:25:100', 'explain' => false),
-		'board_email'			=> array('lang' => 'CONTACT_EMAIL',				'type' => 'text:25:100', 'explain' => false),
+		'board_email'			=> array('lang' => 'CONTACT_EMAIL',				'type' => 'email:25:100', 'explain' => false),
 	);
 	var $advanced_config_options = array(
 		'legend1'				=> 'ACP_EMAIL_SETTINGS',
