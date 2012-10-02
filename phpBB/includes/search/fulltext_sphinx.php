@@ -17,13 +17,6 @@ if (!defined('IN_PHPBB'))
 /**
 * @ignore
 */
-/**
-* This statement is necessary as this file is sometimes included from within a
-* function and the variables used are in global space.
-*/
-global $phpbb_root_path, $phpEx, $table_prefix;
-require($phpbb_root_path . 'includes/sphinxapi.' . $phpEx);
-
 define('SPHINX_MAX_MATCHES', 20000);
 define('SPHINX_CONNECT_RETRIES', 3);
 define('SPHINX_CONNECT_WAIT_TIME', 300);
@@ -35,18 +28,20 @@ define('SPHINX_CONNECT_WAIT_TIME', 300);
 */
 class phpbb_search_fulltext_sphinx
 {
-	private $stats = array();
-	private $split_words = array();
-	private $id;
-	private $indexes;
-	private $sphinx;
-	private $auth;
-	private $config;
-	private $db;
-	private $db_tools;
-	private $dbtype;
-	private $user;
-	private $config_file_data = '';
+	protected $stats = array();
+	protected $split_words = array();
+	protected $id;
+	protected $indexes;
+	protected $sphinx;
+	protected $phpbb_root_path;
+	protected $php_ext;
+	protected $auth;
+	protected $config;
+	protected $db;
+	protected $db_tools;
+	protected $dbtype;
+	protected $user;
+	protected $config_file_data = '';
 	public $search_query;
 	public $common_words = array();
 
@@ -56,9 +51,10 @@ class phpbb_search_fulltext_sphinx
 	 *
 	 * @param string|bool $error Any error that occurs is passed on through this reference variable otherwise false
 	 */
-	public function __construct(&$error)
+	public function __construct(&$error, $phpbb_root_path, $phpEx, $auth, $config, $db, $user)
 	{
-		global $config, $db, $user, $auth, $phpbb_root_path, $phpEx;
+		$this->phpbb_root_path = $phpbb_root_path;
+		$this->php_ext = $phpEx;
 		$this->config = $config;
 		$this->user = $user;
 		$this->db = $db;
@@ -66,7 +62,7 @@ class phpbb_search_fulltext_sphinx
 
 		if (!class_exists('phpbb_db_tools'))
 		{
-			require($phpbb_root_path . 'includes/db/db_tools.' . $phpEx);
+			require($this->phpbb_root_path . 'includes/db/db_tools.' . $this->php_ext);
 		}
 		
 		// Initialize phpbb_db_tools object
@@ -79,6 +75,12 @@ class phpbb_search_fulltext_sphinx
 		$this->id = $this->config['fulltext_sphinx_id'];
 		$this->indexes = 'index_phpbb_' . $this->id . '_delta;index_phpbb_' . $this->id . '_main';
 
+		if (!class_exists('SphinxClient'))
+		{
+			require($this->phpbb_root_path . 'includes/sphinxapi.' . $this->php_ext);
+		}
+
+		// Initialize sphinx client
 		$this->sphinx = new SphinxClient();
 
 		$this->sphinx->SetServer(($this->config['fulltext_sphinx_host'] ? $this->config['fulltext_sphinx_host'] : 'localhost'), ($this->config['fulltext_sphinx_port'] ? (int) $this->config['fulltext_sphinx_port'] : 9312));
@@ -90,8 +92,6 @@ class phpbb_search_fulltext_sphinx
 	* Returns the name of this search backend to be displayed to administrators
 	*
 	* @return string Name
-	*
-	* @access public
 	*/
 	public function get_name()
 	{
@@ -102,10 +102,8 @@ class phpbb_search_fulltext_sphinx
 	* Checks permissions and paths, if everything is correct it generates the config file
 	*
 	* @return string|bool Language key of the error/incompatiblity encountered, or false if successful
-	*
-	* @access public
 	*/
-	function init()
+	public function init()
 	{
 		if ($this->db->sql_layer != 'mysql' && $this->db->sql_layer != 'mysql4' && $this->db->sql_layer != 'mysqli' && $this->db->sql_layer != 'postgres')
 		{
@@ -122,13 +120,9 @@ class phpbb_search_fulltext_sphinx
 	 * Generates content of sphinx.conf
 	 *
 	 * @return bool True if sphinx.conf content is correctly generated, false otherwise
-	 *
-	 * @access private
 	 */
-	function config_generate()
+	protected function config_generate()
 	{
-		global $phpbb_root_path, $phpEx;
-
 		// Check if Database is supported by Sphinx
 		if ($this->db->sql_layer =='mysql' || $this->db->sql_layer == 'mysql4' || $this->db->sql_layer == 'mysqli')
 		{
@@ -151,7 +145,7 @@ class phpbb_search_fulltext_sphinx
 			return false;
 		}
 
-		include($phpbb_root_path . 'config.' . $phpEx);
+		include($this->phpbb_root_path . 'config.' . $this->php_ext);
 
 		/* Now that we're sure everything was entered correctly,
 		generate a config for the index. We use a config value
@@ -306,10 +300,8 @@ class phpbb_search_fulltext_sphinx
 	* @param string $keywords Contains the keyword as entered by the user
 	* @param string $terms is either 'all' or 'any'
 	* @return false if no valid keywords were found and otherwise true
-	*
-	* @access public
 	*/
-	function split_keywords(&$keywords, $terms)
+	public function split_keywords(&$keywords, $terms)
 	{
 		if ($terms == 'all')
 		{
@@ -356,10 +348,8 @@ class phpbb_search_fulltext_sphinx
 	* @param	int			$start				indicates the first index of the page
 	* @param	int			$per_page			number of ids each page is supposed to contain
 	* @return	boolean|int						total number of results
-	*
-	* @access	public
 	*/
-	function keyword_search($type, $fields, $terms, $sort_by_sql, $sort_key, $sort_dir, $sort_days, $ex_fid_ary, $m_approve_fid_ary, $topic_id, $author_ary, $author_name, &$id_ary, $start, $per_page)
+	public function keyword_search($type, $fields, $terms, $sort_by_sql, $sort_key, $sort_dir, $sort_days, $ex_fid_ary, $m_approve_fid_ary, $topic_id, $author_ary, $author_name, &$id_ary, $start, $per_page)
 	{
 		// No keywords? No posts.
 		if (!strlen($this->search_query) && !sizeof($author_ary))
@@ -495,10 +485,23 @@ class phpbb_search_fulltext_sphinx
 		// Could be connection to localhost:9312 failed (errno=111,
 		// msg=Connection refused) during rotate, retry if so
 		$retries = SPHINX_CONNECT_RETRIES;
-		while (!$result && (strpos($this->sphinx->_error, "errno=111,") !== false) && $retries--)
+		while (!$result && (strpos($this->sphinx->GetLastError(), "errno=111,") !== false) && $retries--)
 		{
 			usleep(SPHINX_CONNECT_WAIT_TIME);
 			$result = $this->sphinx->Query($search_query_prefix . str_replace('&quot;', '"', $this->search_query), $this->indexes);
+		}
+
+		if ($this->sphinx->GetLastError())
+		{
+			add_log('critical', 'LOG_SPHINX_ERROR', $this->sphinx->GetLastError());
+			if ($this->auth->acl_get('a_'))
+			{
+				trigger_error($this->user->lang('SPHINX_SEARCH_FAILED', $this->sphinx->GetLastError()));
+			}
+			else
+			{
+				trigger_error($this->user->lang('SPHINX_SEARCH_FAILED_LOG'));
+			}
 		}
 
 		$id_ary = array();
@@ -546,10 +549,8 @@ class phpbb_search_fulltext_sphinx
 	* @param	int			$start				indicates the first index of the page
 	* @param	int			$per_page			number of ids each page is supposed to contain
 	* @return	boolean|int						total number of results
-	*
-	* @access	public
 	*/
-	function author_search($type, $firstpost_only, $sort_by_sql, $sort_key, $sort_dir, $sort_days, $ex_fid_ary, $m_approve_fid_ary, $topic_id, $author_ary, $author_name, &$id_ary, $start, $per_page)
+	public function author_search($type, $firstpost_only, $sort_by_sql, $sort_key, $sort_dir, $sort_days, $ex_fid_ary, $m_approve_fid_ary, $topic_id, $author_ary, $author_name, &$id_ary, $start, $per_page)
 	{
 		$this->search_query = '';
 
@@ -568,10 +569,8 @@ class phpbb_search_fulltext_sphinx
 	 * @param	string	&$subject	New or updated post subject
 	 * @param	int	$poster_id	Post author's user id
 	 * @param	int	$forum_id	The id of the forum in which the post is located
-	 *
-	 * @access public
 	 */
-	function index($mode, $post_id, &$message, &$subject, $poster_id, $forum_id)
+	public function index($mode, $post_id, &$message, &$subject, $poster_id, $forum_id)
 	{
 		if ($mode == 'edit')
 		{
@@ -613,10 +612,8 @@ class phpbb_search_fulltext_sphinx
 
 	/**
 	* Delete a post from the index after it was deleted
-	*
-	* @access public
 	*/
-	function index_remove($post_ids, $author_ids, $forum_ids)
+	public function index_remove($post_ids, $author_ids, $forum_ids)
 	{
 		$values = array();
 		foreach ($post_ids as $post_id)
@@ -629,10 +626,8 @@ class phpbb_search_fulltext_sphinx
 
 	/**
 	* Nothing needs to be destroyed
-	*
-	* @access public
 	*/
-	function tidy($create = false)
+	public function tidy($create = false)
 	{
 		set_config('search_last_gc', time(), true);
 	}
@@ -641,10 +636,8 @@ class phpbb_search_fulltext_sphinx
 	* Create sphinx table
 	*
 	* @return string|bool error string is returned incase of errors otherwise false
-	*
-	* @access public
 	*/
-	function create_index($acp_module, $u_action)
+	public function create_index($acp_module, $u_action)
 	{
 		if (!$this->index_created())
 		{
@@ -675,10 +668,8 @@ class phpbb_search_fulltext_sphinx
 	* Drop sphinx table
 	*
 	* @return string|bool error string is returned incase of errors otherwise false
-	*
-	* @access public
 	*/
-	function delete_index($acp_module, $u_action)
+	public function delete_index($acp_module, $u_action)
 	{
 		if (!$this->index_created())
 		{
@@ -694,10 +685,8 @@ class phpbb_search_fulltext_sphinx
 	* Returns true if the sphinx table was created
 	*
 	* @return bool true if sphinx table was created
-	*
-	* @access public
 	*/
-	function index_created($allow_new_files = true)
+	public function index_created($allow_new_files = true)
 	{
 		$created = false;
 
@@ -713,10 +702,8 @@ class phpbb_search_fulltext_sphinx
 	* Returns an associative array containing information about the indexes
 	*
 	* @return string|bool Language string of error false otherwise
-	*
-	* @access public
 	*/
-	function index_stats()
+	public function index_stats()
 	{
 		if (empty($this->stats))
 		{
@@ -732,10 +719,8 @@ class phpbb_search_fulltext_sphinx
 
 	/**
 	* Collects stats that can be displayed on the index maintenance page
-	*
-	* @access private
 	*/
-	function get_stats()
+	protected function get_stats()
 	{
 		if ($this->index_created())
 		{
@@ -759,10 +744,8 @@ class phpbb_search_fulltext_sphinx
 	* Returns a list of options for the ACP to display
 	*
 	* @return associative array containing template and config variables
-	*
-	* @access public
 	*/
-	function acp()
+	public function acp()
 	{
 		$config_vars = array(
 			'fulltext_sphinx_data_path' => 'string',
