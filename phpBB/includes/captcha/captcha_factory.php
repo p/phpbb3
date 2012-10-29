@@ -56,7 +56,7 @@ class phpbb_captcha_factory
 	/**
 	* return a list of all discovered CAPTCHA plugins
 	*/
-	function get_captcha_types()
+	public static function get_captcha_types()
 	{
 		global $phpbb_root_path, $phpEx, $phpbb_extension_manager;
 
