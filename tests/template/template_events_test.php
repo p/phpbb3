@@ -11,9 +11,6 @@ require_once dirname(__FILE__) . '/template_test_case.php';
 
 class phpbb_template_template_events_test extends phpbb_template_template_test_case
 {
-	static private $copied_files = array();
-	static private $helper;
-
 	public function template_data()
 	{
 		return array(
