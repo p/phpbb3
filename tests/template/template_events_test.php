@@ -52,10 +52,10 @@ Trivial3 test event in all',
 		self::$helper = new phpbb_test_case_helpers(self);
 
 		// First, move any extensions setup on the board to a temp directory
-		self::$copied_files = self::$helper->copy_dir($phpbb_root_path . 'ext/', $phpbb_root_path . 'store/temp_ext/');
+		@self::$copied_files = self::$helper->copy_dir($phpbb_root_path . 'ext/', $phpbb_root_path . 'store/temp_ext/');
 
 		// Then empty the ext/ directory on the board (for accurate test cases)
-		self::$helper->empty_dir($phpbb_root_path . 'ext/');
+		@self::$helper->empty_dir($phpbb_root_path . 'ext/');
 
 		// Copy our ext/ files from the test case to the board
 		self::$copied_files = array_merge(self::$copied_files, self::$helper->copy_dir(dirname(__FILE__) . '/ext/', $phpbb_root_path . 'ext/'));
