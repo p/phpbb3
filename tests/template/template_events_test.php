@@ -40,48 +40,6 @@ Trivial3 test event in all',
 	}
 
 	/**
-	* This should only be called once before the tests are run.
-	* This is used to copy the extensions to the phpBB install
-	*/
-	static public function setUpBeforeClass()
-	{
-		global $phpbb_root_path;
-
-		parent::setUpBeforeClass();
-
-		self::$helper = new phpbb_test_case_helpers(self);
-
-		// First, move any extensions setup on the board to a temp directory
-		self::$copied_files = self::$helper->copy_dir($phpbb_root_path . 'ext/', $phpbb_root_path . 'store/temp_ext/');
-
-		// Then empty the ext/ directory on the board (for accurate test cases)
-		self::$helper->empty_dir($phpbb_root_path . 'ext/');
-
-		// Copy our ext/ files from the test case to the board
-		self::$copied_files = array_merge(self::$copied_files, self::$helper->copy_dir(dirname(__FILE__) . '/ext/', $phpbb_root_path . 'ext/'));
-
-		// Copy style files to the board
-		self::$copied_files = array_merge(self::$copied_files, self::$helper->copy_dir(dirname(__FILE__) . '/styles/', $phpbb_root_path . 'styles/'));
-	}
-
-	/**
-	* This should only be called once after the tests are run.
-	* This is used to remove the files copied to the phpBB install
-	*/
-	static public function tearDownAfterClass()
-	{
-		global $phpbb_root_path;
-
-		// Copy back the board installed extensions from the temp directory
-		self::$helper->copy_dir($phpbb_root_path . 'store/temp_ext/', $phpbb_root_path . 'ext/');
-
-		self::$copied_files[] = $phpbb_root_path . 'store/temp_ext/';
-
-		// Remove all of the files we copied around (from board ext -> temp_ext, from test ext -> board ext)
-		self::$helper->remove_files(self::$copied_files);
-	}
-
-	/**
 	* @dataProvider template_data
 	*/
 	public function test_event($desc, $file, array $vars, array $block_vars, array $destroy, $expected)
