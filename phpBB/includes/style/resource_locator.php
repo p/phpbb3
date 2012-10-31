@@ -239,6 +239,46 @@ class phpbb_style_resource_locator implements phpbb_template_locator
 	}
 
 	/**
+	* Finds files in the template tree.
+	* Searches for the first file it finds in any section
+        * (primary phpBB styles, any installed extensions)
+	* for the most specific (e.g. 
+        * styles/prosilver_inheriting_style/template/test >
+        * styles/prosilver/template/test > styles/all/template/test)
+	* template file and returns an array of files.
+	*
+	* @param string $filename File name to look for (e.g. test.html)
+	* @return array array of strings (file paths)
+	*/
+        public function get_source_files($filename)
+	{
+		$files = array();
+
+		// Go through root directories
+		foreach ($this->roots as $root_key => $root_paths)
+		{
+			foreach ($root_paths as $root)
+			{
+                                // $root here is the template directory
+				$file = $root . '/' . $filename;
+                        var_dump(array($root, $file));
+
+				if (file_exists($file))
+				{
+					$files[] = $file;
+
+					// Find the first source file in
+                                        // this root path, ignore ones
+                                        // lower in the tree
+					break;
+				}
+			}
+		}
+
+		return $files;
+	}
+
+	/**
 	* Locates source file path, accounting for styles tree and verifying that
 	* the path exists.
 	*
