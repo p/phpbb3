@@ -17,7 +17,7 @@ if (!defined('IN_PHPBB'))
 
 
 /**
-* Style resource locator. 
+* Style resource locator.
 * Maintains mapping from template handles to source template file paths.
 * Locates style files: resources (such as .js and .css files) and templates.
 *
@@ -97,7 +97,7 @@ class phpbb_style_resource_locator implements phpbb_template_locator
 	* Sets the template filenames for handles. $filename_array
 	* should be a hash of handle => filename pairs.
 	*
-	* @param array $filname_array Should be a hash of handle => filename pairs.
+	* @param array $filename_array Should be a hash of handle => filename pairs.
 	*/
 	public function set_filenames(array $filename_array)
 	{
@@ -150,7 +150,7 @@ class phpbb_style_resource_locator implements phpbb_template_locator
 	* returns actually exists, it is faster than get_source_file_for_handle.
 	*
 	* Use get_source_file_for_handle to obtain the actual path that is
-	* guaranteed to exist (which might come from the parent style 
+	* guaranteed to exist (which might come from the parent style
 	* directory if primary style has parent styles).
 	*
 	* This function will trigger an error if the handle was never
