@@ -293,7 +293,7 @@ class phpbb_database_test_connection_manager
 	protected function load_schema_from_file($directory)
 	{
 		$schema = $this->dbms['SCHEMA'];
-		
+
 		if ($this->config['dbms'] == 'mysql')
 		{
 			$sth = $this->pdo->query('SELECT VERSION() AS version');
@@ -313,7 +313,7 @@ class phpbb_database_test_connection_manager
 
 		$queries = file_get_contents($filename);
 		$sql = phpbb_remove_comments($queries);
-		
+
 		$sql = split_sql_file($sql, $this->dbms['DELIM']);
 
 		foreach ($sql as $query)
@@ -515,9 +515,14 @@ class phpbb_database_test_connection_manager
 			break;
 		}
 
-		foreach ($queries as $query)
+		if ($queries)
 		{
-			$this->pdo->exec($query);
+			$this->pdo->exec('begin');
+			foreach ($queries as $query)
+			{
+				$this->pdo->exec($query);
+			}
+			$this->pdo->exec('commit');
 		}
 	}
 }
