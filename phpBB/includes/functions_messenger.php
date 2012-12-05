@@ -388,6 +388,13 @@ class messenger
 			return;
 		}
 	}
+        
+        function generate_message_id() {
+		global $config;
+
+                $address = md5(unique_id(time())) . '@' . $config['server_name'];
+                return '<' . $address . '>';
+        }
 
 	/**
 	* Return email header
@@ -415,7 +422,7 @@ class messenger
 		$headers[] = 'Return-Path: <' . $config['board_email'] . '>';
 		$headers[] = 'Sender: <' . $config['board_email'] . '>';
 		$headers[] = 'MIME-Version: 1.0';
-		$headers[] = 'Message-ID: <' . md5(unique_id(time())) . '@' . $config['server_name'] . '>';
+		$headers[] = 'Message-ID: ' . $this->generate_message_id();
 		$headers[] = 'Date: ' . date('r', time());
 		$headers[] = 'Content-Type: text/plain; charset=UTF-8'; // format=flowed
 		$headers[] = 'Content-Transfer-Encoding: 8bit'; // 7bit
