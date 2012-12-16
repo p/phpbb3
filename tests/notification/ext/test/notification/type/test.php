@@ -27,7 +27,7 @@ class phpbb_notification_type_test extends phpbb_notification_type_base
 		return (int) $post['post_id'];
 	}
 
-	public static function get_item_parent_id($post)
+	public static function get_notification_type_parent_id($post)
 	{
 		return (int) $post['topic_id'];
 	}

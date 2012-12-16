@@ -443,7 +443,7 @@ CREATE TABLE phpbb_notifications (
 	notification_id mediumint(8) UNSIGNED NOT NULL auto_increment,
 	notification_type varbinary(255) DEFAULT '' NOT NULL,
 	notification_type_id mediumint(8) UNSIGNED DEFAULT '0' NOT NULL,
-	item_parent_id mediumint(8) UNSIGNED DEFAULT '0' NOT NULL,
+	notification_type_parent_id mediumint(8) UNSIGNED DEFAULT '0' NOT NULL,
 	user_id mediumint(8) UNSIGNED DEFAULT '0' NOT NULL,
 	notification_read tinyint(1) UNSIGNED DEFAULT '0' NOT NULL,
 	notification_time int(11) UNSIGNED DEFAULT '1' NOT NULL,

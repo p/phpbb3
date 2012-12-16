@@ -74,7 +74,7 @@ class phpbb_notification_type_post extends phpbb_notification_type_base
 	*
 	* @param array $post The data from the post
 	*/
-	public static function get_item_parent_id($post)
+	public static function get_notification_type_parent_id($post)
 	{
 		return (int) $post['topic_id'];
 	}
@@ -125,7 +125,7 @@ class phpbb_notification_type_post extends phpbb_notification_type_base
 		$sql = 'SELECT n.*
 			FROM ' . $this->notifications_table . ' n, ' . $this->notification_types_table . " nt
 			WHERE n.notification_type = '" . $this->get_type() . "'
-				AND n.item_parent_id = " . (int) self::get_item_parent_id($post) . '
+				AND n.notification_type_parent_id = " . (int) self::get_notification_type_parent_id($post) . '
 				AND n.notification_read = 0
 				AND nt.notification_type = n.notification_type
 				AND nt.notification_type_enabled = 1';
@@ -225,11 +225,11 @@ class phpbb_notification_type_post extends phpbb_notification_type_base
 			'TOPIC_TITLE'				=> htmlspecialchars_decode(censor_text($this->get_data('topic_title'))),
 
 			'U_VIEW_POST'				=> generate_board_url() . "/viewtopic.{$this->php_ext}?p={$this->notification_type_id}#p{$this->notification_type_id}",
-			'U_NEWEST_POST'				=> generate_board_url() . "/viewtopic.{$this->php_ext}?f={$this->get_data('forum_id')}&t={$this->item_parent_id}&view=unread#unread",
-			'U_TOPIC'					=> generate_board_url() . "/viewtopic.{$this->php_ext}?f={$this->get_data('forum_id')}&t={$this->item_parent_id}",
-			'U_VIEW_TOPIC'				=> generate_board_url() . "/viewtopic.{$this->php_ext}?f={$this->get_data('forum_id')}&t={$this->item_parent_id}",
+			'U_NEWEST_POST'				=> generate_board_url() . "/viewtopic.{$this->php_ext}?f={$this->get_data('forum_id')}&t={$this->notification_type_parent_id}&view=unread#unread",
+			'U_TOPIC'					=> generate_board_url() . "/viewtopic.{$this->php_ext}?f={$this->get_data('forum_id')}&t={$this->notification_type_parent_id}",
+			'U_VIEW_TOPIC'				=> generate_board_url() . "/viewtopic.{$this->php_ext}?f={$this->get_data('forum_id')}&t={$this->notification_type_parent_id}",
 			'U_FORUM'					=> generate_board_url() . "/viewforum.{$this->php_ext}?f={$this->get_data('forum_id')}",
-			'U_STOP_WATCHING_TOPIC'		=> generate_board_url() . "/viewtopic.{$this->php_ext}?uid={$this->user_id}&f={$this->get_data('forum_id')}&t={$this->item_parent_id}&unwatch=topic",
+			'U_STOP_WATCHING_TOPIC'		=> generate_board_url() . "/viewtopic.{$this->php_ext}?uid={$this->user_id}&f={$this->get_data('forum_id')}&t={$this->notification_type_parent_id}&unwatch=topic",
 		);
 	}
 

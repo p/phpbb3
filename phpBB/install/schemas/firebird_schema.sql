@@ -632,7 +632,7 @@ CREATE TABLE phpbb_notifications (
 	notification_id INTEGER NOT NULL,
 	notification_type VARCHAR(255) CHARACTER SET NONE DEFAULT '' NOT NULL,
 	notification_type_id INTEGER DEFAULT 0 NOT NULL,
-	item_parent_id INTEGER DEFAULT 0 NOT NULL,
+	notification_type_parent_id INTEGER DEFAULT 0 NOT NULL,
 	user_id INTEGER DEFAULT 0 NOT NULL,
 	notification_read INTEGER DEFAULT 0 NOT NULL,
 	notification_time INTEGER DEFAULT 1 NOT NULL,

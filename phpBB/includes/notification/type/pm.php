@@ -66,7 +66,7 @@ class phpbb_notification_type_pm extends phpbb_notification_type_base
 	*
 	* @param array $pm The data from the pm
 	*/
-	public static function get_item_parent_id($pm)
+	public static function get_notification_type_parent_id($pm)
 	{
 		// No parent
 		return 0;

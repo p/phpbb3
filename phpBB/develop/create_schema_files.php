@@ -1308,7 +1308,7 @@ function get_schema_struct()
 			'notification_id'				=> array('UINT', NULL, 'auto_increment'),
 			'notification_type'				=> array('VCHAR:255', ''),
 			'notification_type_id'			=> array('UINT', 0),
-			'item_parent_id'				=> array('UINT', 0),
+			'notification_type_parent_id'	=> array('UINT', 0),
 			'user_id'						=> array('UINT', 0),
 			'notification_read'				=> array('BOOL', 0),
 			'notification_time'				=> array('TIMESTAMP', 1),

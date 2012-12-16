@@ -97,7 +97,7 @@ class phpbb_notification_type_topic_in_queue extends phpbb_notification_type_top
 	*/
 	public function get_url()
 	{
-		return append_sid($this->phpbb_root_path . 'mcp.' . $this->php_ext, "i=queue&amp;mode=approve_details&amp;f={$this->item_parent_id}&amp;t={$this->notification_type_id}");
+		return append_sid($this->phpbb_root_path . 'mcp.' . $this->php_ext, "i=queue&amp;mode=approve_details&amp;f={$this->notification_type_parent_id}&amp;t={$this->notification_type_id}");
 	}
 
 	/**

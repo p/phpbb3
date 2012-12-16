@@ -776,7 +776,7 @@ CREATE TABLE [phpbb_notifications] (
 	[notification_id] [int] IDENTITY (1, 1) NOT NULL ,
 	[notification_type] [varchar] (255) DEFAULT ('') NOT NULL ,
 	[notification_type_id] [int] DEFAULT (0) NOT NULL ,
-	[item_parent_id] [int] DEFAULT (0) NOT NULL ,
+	[notification_type_parent_id] [int] DEFAULT (0) NOT NULL ,
 	[user_id] [int] DEFAULT (0) NOT NULL ,
 	[notification_read] [int] DEFAULT (0) NOT NULL ,
 	[notification_time] [int] DEFAULT (1) NOT NULL ,

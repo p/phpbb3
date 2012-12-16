@@ -203,7 +203,7 @@ class phpbb_notification_test extends phpbb_database_test_case
 			1 => array(
 				'notification_type'				=> 'test',
 				'notification_type_id'			=> 1,
-				'item_parent_id'   				=> 1,
+				'notification_type_parent_id'   => 1,
 				'user_id'	   					=> 0,
 				'notification_read'				=> 0,
 				'notification_time'	   			=> 1349413321,
@@ -212,7 +212,7 @@ class phpbb_notification_test extends phpbb_database_test_case
 			2 => array(
 				'notification_type'				=> 'test',
 				'notification_type_id'			=> 2,
-				'item_parent_id'   				=> 2,
+				'notification_type_parent_id'   => 2,
 				'user_id'	   	   				=> 0,
 				'notification_read'				=> 0,
 				'notification_time'	   			=> 1349413322,
@@ -221,7 +221,7 @@ class phpbb_notification_test extends phpbb_database_test_case
 			3 => array(
 				'notification_type'				=> 'test',
 				'notification_type_id'			=> 3,
-				'item_parent_id'   				=> 2,
+				'notification_type_parent_id'   => 2,
 				'user_id'	   	   				=> 0,
 				'notification_read'				=> 0,
 				'notification_time'	   			=> 1349413323,
@@ -230,7 +230,7 @@ class phpbb_notification_test extends phpbb_database_test_case
 			4 => array(
 				'notification_type'				=> 'post',
 				'notification_type_id'			=> 4,
-				'item_parent_id'   				=> 2,
+				'notification_type_parent_id'   => 2,
 				'user_id'	   	   				=> 0,
 				'notification_read'				=> 0,
 				'notification_time'	   			=> 1349413324,
@@ -246,7 +246,7 @@ class phpbb_notification_test extends phpbb_database_test_case
 			5 => array(
 				'notification_type'				=> 'bookmark',
 				'notification_type_id'			=> 5,
-				'item_parent_id'   				=> 2,
+				'notification_type_parent_id'   => 2,
 				'user_id'	   	   				=> 0,
 				'notification_read'				=> 0,
 				'notification_time'	   			=> 1349413325,
@@ -309,7 +309,7 @@ class phpbb_notification_test extends phpbb_database_test_case
 			1 => array(
 				'notification_type'				=> 'test',
 				'notification_type_id'			=> 1,
-				'item_parent_id'				=> 2,
+				'notification_type_parent_id'	=> 2,
 				'user_id'	   					=> 0,
 				'notification_read'				=> 0,
 				'notification_time'	   			=> 1349413321,
@@ -318,7 +318,7 @@ class phpbb_notification_test extends phpbb_database_test_case
 			2 => array(
 				'notification_type'				=> 'test',
 				'notification_type_id'			=> 2,
-				'item_parent_id'   				=> 2,
+				'notification_type_parent_id'   => 2,
 				'user_id'	   					=> 0,
 				'notification_read'				=> 0,
 				'notification_time'	   			=> 1349413322,
@@ -327,7 +327,7 @@ class phpbb_notification_test extends phpbb_database_test_case
 			3 => array(
 				'notification_type'				=> 'test',
 				'notification_type_id'			=> 3,
-				'item_parent_id'   				=> 2,
+				'notification_type_parent_id'   => 2,
 				'user_id'	   	   				=> 0,
 				'notification_read'				=> 0,
 				'notification_time'	   			=> 1234,
@@ -336,7 +336,7 @@ class phpbb_notification_test extends phpbb_database_test_case
 			4 => array(
 				'notification_type'				=> 'post',
 				'notification_type_id'			=> 4,
-				'item_parent_id'   				=> 2,
+				'notification_type_parent_id'   => 2,
 				'user_id'	   	   				=> 0,
 				'notification_read'				=> 0,
 				'notification_time'	   			=> 1349413324,
@@ -352,7 +352,7 @@ class phpbb_notification_test extends phpbb_database_test_case
 			5 => array(
 				'notification_type'				=> 'bookmark',
 				'notification_type_id'			=> 5,
-				'item_parent_id'				=> 2,
+				'notification_type_parent_id'	=> 2,
 				'user_id'	   					=> 0,
 				'notification_read'				=> 0,
 				'notification_time'	   			=> 1349413325,

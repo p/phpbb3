@@ -69,7 +69,7 @@ abstract class phpbb_notification_type_base implements phpbb_notification_type_i
 	* Indentification data
 	* notification_type			- Type of the item (translates to the notification type)
 	* notification_type_id			- ID of the item (e.g. post_id, msg_id)
-	* item_parent_id	- Parent item id (ex: for topic => forum_id, for post => topic_id, etc)
+	* notification_type_parent_id	- Parent item id (ex: for topic => forum_id, for post => topic_id, etc)
 	* user_id
 	* unread
 	* time
@@ -166,7 +166,7 @@ abstract class phpbb_notification_type_base implements phpbb_notification_type_i
 		$this->data = array_merge(array(
 			'notification_type_id'	=> static::get_notification_type_id($type_data),
 			'notification_type'	   	=> $this->get_type(),
-			'item_parent_id'		=> static::get_item_parent_id($type_data),
+			'notification_type_parent_id'		=> static::get_notification_type_parent_id($type_data),
 
 			'notification_time'		=> time(),
 			'notification_read'		=> false,

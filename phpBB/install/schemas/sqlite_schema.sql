@@ -430,7 +430,7 @@ CREATE TABLE phpbb_notifications (
 	notification_id INTEGER PRIMARY KEY NOT NULL ,
 	notification_type varchar(255) NOT NULL DEFAULT '',
 	notification_type_id INTEGER UNSIGNED NOT NULL DEFAULT '0',
-	item_parent_id INTEGER UNSIGNED NOT NULL DEFAULT '0',
+	notification_type_parent_id INTEGER UNSIGNED NOT NULL DEFAULT '0',
 	user_id INTEGER UNSIGNED NOT NULL DEFAULT '0',
 	notification_read INTEGER UNSIGNED NOT NULL DEFAULT '0',
 	notification_time INTEGER UNSIGNED NOT NULL DEFAULT '1',

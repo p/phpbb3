@@ -249,17 +249,17 @@ class phpbb_notification_manager
 	* Mark notifications read from a parent identifier
 	*
 	* @param string|array $notification_type Type identifier or array of item types (only acceptable if the $data is identical for the specified types)
-	* @param bool|int|array $item_parent_id Item parent id or array of item parent ids. False to mark read for all item parent ids
+	* @param bool|int|array $notification_type_parent_id Item parent id or array of item parent ids. False to mark read for all item parent ids
 	* @param bool|int|array $user_id User id or array of user ids. False to mark read for all user ids
 	* @param bool|int $time Time at which to mark all notifications prior to as read. False to mark all as read. (Default: False)
 	*/
-	public function mark_notifications_read_by_parent($notification_type, $item_parent_id, $user_id, $time = false)
+	public function mark_notifications_read_by_parent($notification_type, $notification_type_parent_id, $user_id, $time = false)
 	{
 		if (is_array($notification_type))
 		{
 			foreach ($notification_type as $type)
 			{
-				$this->mark_notifications_read_by_parent($type, $item_parent_id, $user_id, $time);
+				$this->mark_notifications_read_by_parent($type, $notification_type_parent_id, $user_id, $time);
 			}
 
 			return;
@@ -271,7 +271,7 @@ class phpbb_notification_manager
 			SET notification_read = 1
 			WHERE notification_type = '" . $this->db->sql_escape($notification_type) . "'
 				AND notification_time <= " . $time .
-				(($item_parent_id !== false) ? ' AND ' . (is_array($item_parent_id) ? $this->db->sql_in_set('item_parent_id', $item_parent_id) : 'item_parent_id = ' . (int) $item_parent_id) : '') .
+				(($notification_type_parent_id !== false) ? ' AND ' . (is_array($notification_type_parent_id) ? $this->db->sql_in_set('notification_type_parent_id', $notification_type_parent_id) : 'notification_type_parent_id = ' . (int) $notification_type_parent_id) : '') .
 				(($user_id !== false) ? ' AND ' . (is_array($user_id) ? $this->db->sql_in_set('user_id', $user_id) : 'user_id = ' . (int) $user_id) : '');
 		$this->db->sql_query($sql);
 	}

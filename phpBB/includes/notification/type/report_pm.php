@@ -64,7 +64,7 @@ class phpbb_notification_type_report_pm extends phpbb_notification_type_pm
 	*
 	* @param array $pm The data from the pm
 	*/
-	public static function get_item_parent_id($pm)
+	public static function get_notification_type_parent_id($pm)
 	{
 		return (int) $pm['report_id'];
 	}
@@ -137,7 +137,7 @@ class phpbb_notification_type_report_pm extends phpbb_notification_type_pm
 			'AUTHOR_NAME'				=> htmlspecialchars_decode($user_data['username']),
 			'SUBJECT'					=> htmlspecialchars_decode(censor_text($this->get_data('message_subject'))),
 
-			'U_VIEW_REPORT'				=> generate_board_url() . "mcp.{$this->php_ext}?r={$this->item_parent_id}&amp;i=pm_reports&amp;mode=pm_report_details",
+			'U_VIEW_REPORT'				=> generate_board_url() . "mcp.{$this->php_ext}?r={$this->notification_type_parent_id}&amp;i=pm_reports&amp;mode=pm_report_details",
 		);
 	}
 
@@ -148,7 +148,7 @@ class phpbb_notification_type_report_pm extends phpbb_notification_type_pm
 	*/
 	public function get_url()
 	{
-		return append_sid($this->phpbb_root_path . 'mcp.' . $this->php_ext, "r={$this->item_parent_id}&amp;i=pm_reports&amp;mode=pm_report_details");
+		return append_sid($this->phpbb_root_path . 'mcp.' . $this->php_ext, "r={$this->notification_type_parent_id}&amp;i=pm_reports&amp;mode=pm_report_details");
 	}
 
 	/**

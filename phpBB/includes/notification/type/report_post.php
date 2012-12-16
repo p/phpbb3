@@ -101,9 +101,9 @@ class phpbb_notification_type_report_post extends phpbb_notification_type_post_i
 
 			'U_VIEW_REPORT'				=> "{$board_url}mcp.{$this->php_ext}?f={$this->get_data('forum_id')}&amp;p={$this->notification_type_id}&amp;i=reports&amp;mode=report_details#reports",
 			'U_VIEW_POST'				=> "{$board_url}/viewtopic.{$this->php_ext}?p={$this->notification_type_id}#p{$this->notification_type_id}",
-			'U_NEWEST_POST'				=> "{$board_url}/viewtopic.{$this->php_ext}?f={$this->get_data('forum_id')}&t={$this->item_parent_id}&view=unread#unread",
-			'U_TOPIC'					=> "{$board_url}/viewtopic.{$this->php_ext}?f={$this->get_data('forum_id')}&t={$this->item_parent_id}",
-			'U_VIEW_TOPIC'				=> "{$board_url}/viewtopic.{$this->php_ext}?f={$this->get_data('forum_id')}&t={$this->item_parent_id}",
+			'U_NEWEST_POST'				=> "{$board_url}/viewtopic.{$this->php_ext}?f={$this->get_data('forum_id')}&t={$this->notification_type_parent_id}&view=unread#unread",
+			'U_TOPIC'					=> "{$board_url}/viewtopic.{$this->php_ext}?f={$this->get_data('forum_id')}&t={$this->notification_type_parent_id}",
+			'U_VIEW_TOPIC'				=> "{$board_url}/viewtopic.{$this->php_ext}?f={$this->get_data('forum_id')}&t={$this->notification_type_parent_id}",
 			'U_FORUM'					=> "{$board_url}/viewforum.{$this->php_ext}?f={$this->get_data('forum_id')}",
 		);
 	}

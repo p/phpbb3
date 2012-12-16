@@ -615,7 +615,7 @@ CREATE TABLE phpbb_notifications (
 	notification_id INT4 DEFAULT nextval('phpbb_notifications_seq'),
 	notification_type varchar(255) DEFAULT '' NOT NULL,
 	notification_type_id INT4 DEFAULT '0' NOT NULL CHECK (notification_type_id >= 0),
-	item_parent_id INT4 DEFAULT '0' NOT NULL CHECK (item_parent_id >= 0),
+	notification_type_parent_id INT4 DEFAULT '0' NOT NULL CHECK (notification_type_parent_id >= 0),
 	user_id INT4 DEFAULT '0' NOT NULL CHECK (user_id >= 0),
 	notification_read INT2 DEFAULT '0' NOT NULL CHECK (notification_read >= 0),
 	notification_time INT4 DEFAULT '1' NOT NULL CHECK (notification_time >= 0),
