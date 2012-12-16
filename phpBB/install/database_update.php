@@ -1193,7 +1193,7 @@ function database_update_info()
 				NOTIFICATIONS_TABLE		=> array(
 					'COLUMNS'			=> array(
 						'notification_id'	=> array('UINT', NULL, 'auto_increment'),
-						'item_type'			=> array('VCHAR:255', ''),
+						'notification_type'	=> array('VCHAR:255', ''),
 						'item_id'			=> array('UINT', 0),
 						'item_parent_id'	=> array('UINT', 0),
 						'user_id'			=> array('UINT', 0),
@@ -1204,20 +1204,20 @@ function database_update_info()
 					),
 					'PRIMARY_KEY'		=> 'notification_id',
 					'KEYS'				=> array(
-						'item_ident'		=> array('INDEX', array('item_type', 'item_id')),
+						'item_ident'		=> array('INDEX', array('notification_type', 'item_id')),
 						'user'				=> array('INDEX', array('user_id', 'unread')),
 					),
 				),
 				USER_NOTIFICATIONS_TABLE	=> array(
 					'COLUMNS'			=> array(
-						'item_type'			=> array('VCHAR:255', ''),
+						'notification_type'	=> array('VCHAR:255', ''),
 						'item_id'			=> array('UINT', 0),
 						'user_id'			=> array('UINT', 0),
 						'method'			=> array('VCHAR:255', ''),
 						'notify'			=> array('BOOL', 1),
 					),
 					'PRIMARY_KEY'		=> array(
-						'item_type',
+						'notification_type',
 						'item_id',
 						'user_id',
 						'method',
@@ -3004,20 +3004,20 @@ function change_database_data(&$no_updates, $version)
 				// Convert notifications
 				$convert_notifications = array(
 					array(
-						'check'			=> ($config['allow_topic_notify']),
-						'item_type'		=> 'post',
+						'check'					=> ($config['allow_topic_notify']),
+						'notification_type'		=> 'post',
 					),
 					array(
-						'check'			=> ($config['allow_forum_notify']),
-						'item_type'		=> 'topic',
+						'check'					=> ($config['allow_forum_notify']),
+						'notification_type'		=> 'topic',
 					),
 					array(
-						'check'			=> ($config['allow_bookmarks']),
-						'item_type'		=> 'bookmark',
+						'check'					=> ($config['allow_bookmarks']),
+						'notification_type'		=> 'bookmark',
 					),
 					array(
-						'check'			=> ($config['allow_privmsg']),
-						'item_type'		=> 'pm',
+						'check'					=> ($config['allow_privmsg']),
+						'notification_type'		=> 'pm',
 					),
 				);
 
@@ -3032,29 +3032,29 @@ function change_database_data(&$no_updates, $version)
 						while ($row = $db->sql_fetchrow($result))
 						{
 							_sql('INSERT INTO ' . $table_prefix . 'user_notifications ' . $db->sql_build_array('INSERT', array(
-								'item_type'		=> $convert_data['item_type'],
-								'item_id'		=> 0,
-								'user_id'		=> $row['user_id'],
-								'method'		=> '',
+								'notification_type'		=> $convert_data['notification_type'],
+								'item_id'				=> 0,
+								'user_id'				=> $row['user_id'],
+								'method'				=> '',
 							)), $errored, $error_ary);
 
 							if ($row['user_notify_type'] == NOTIFY_EMAIL || $row['user_notify_type'] == NOTIFY_BOTH)
 							{
 								_sql('INSERT INTO ' . $table_prefix . 'user_notifications ' . $db->sql_build_array('INSERT', array(
-									'item_type'		=> $convert_data['item_type'],
-									'item_id'		=> 0,
-									'user_id'		=> $row['user_id'],
-									'method'		=> 'email',
+									'notification_type'		=> $convert_data['notification_type'],
+									'item_id'				=> 0,
+									'user_id'				=> $row['user_id'],
+									'method'				=> 'email',
 								)), $errored, $error_ary);
 							}
 
 							if ($row['user_notify_type'] == NOTIFY_IM || $row['user_notify_type'] == NOTIFY_BOTH)
 							{
 								_sql('INSERT INTO ' . $table_prefix . 'user_notifications ' . $db->sql_build_array('INSERT', array(
-									'item_type'		=> $convert_data['item_type'],
-									'item_id'		=> 0,
-									'user_id'		=> $row['user_id'],
-									'method'		=> 'jabber',
+									'notification_type'		=> $convert_data['notification_type'],
+									'item_id'				=> 0,
+									'user_id'				=> $row['user_id'],
+									'method'				=> 'jabber',
 								)), $errored, $error_ary);
 							}
 						}

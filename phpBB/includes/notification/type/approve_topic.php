@@ -84,7 +84,7 @@ class phpbb_notification_type_approve_topic extends phpbb_notification_type_topi
 		}
 
 		return $this->check_user_notification_options($auth_read[$post['forum_id']]['f_read'], array_merge($options, array(
-			'item_type'		=> self::$notification_option['id'],
+			'notification_type'		=> self::$notification_option['id'],
 		)));
 	}
 

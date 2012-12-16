@@ -40,11 +40,11 @@ class phpbb_mock_notifications_notification_manager extends phpbb_notification_m
 	/**
 	* Helper to get the notifications item type class and set it up
 	*/
-	public function get_item_type_class($item_type, $data = array())
+	public function get_notification_type_class($notification_type, $data = array())
 	{
-		$item_type = 'phpbb_notification_type_' . $item_type;
+		$notification_type = 'phpbb_notification_type_' . $notification_type;
 
-		$item = new $item_type($this->user_loader, $this->db, $this->cache, $this->user, $this->auth, $this->config, $this->phpbb_root_path, $this->php_ext, $this->notifications_table, $this->user_notifications_table);
+		$item = new $notification_type($this->user_loader, $this->db, $this->cache, $this->user, $this->auth, $this->config, $this->phpbb_root_path, $this->php_ext, $this->notifications_table, $this->user_notifications_table);
 
 		$item->set_notification_manager($this);
 

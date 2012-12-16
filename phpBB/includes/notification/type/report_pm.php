@@ -112,7 +112,7 @@ class phpbb_notification_type_report_pm extends phpbb_notification_type_pm
 		}
 
 		return $this->check_user_notification_options($auth_approve[$post['forum_id']][$this->permission], array_merge($options, array(
-			'item_type'		=> self::$notification_option['id'],
+			'notification_type'		=> self::$notification_option['id'],
 		)));
 	}
 

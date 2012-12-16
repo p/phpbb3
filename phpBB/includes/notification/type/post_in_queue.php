@@ -93,7 +93,7 @@ class phpbb_notification_type_post_in_queue extends phpbb_notification_type_post
 		$auth_approve[$post['forum_id']] = array_unique(array_merge($auth_approve[$post['forum_id']], $auth_approve[0]));
 
 		return $this->check_user_notification_options($auth_approve[$post['forum_id']][$this->permission], array_merge($options, array(
-			'item_type'		=> self::$notification_option['id'],
+			'notification_type'		=> self::$notification_option['id'],
 		)));
 	}
 

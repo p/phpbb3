@@ -122,10 +122,10 @@ class phpbb_notification_type_quote extends phpbb_notification_type_post
 		$update_notifications = array();
 		$sql = 'SELECT n.*
 			FROM ' . $this->notifications_table . ' n, ' . $this->notification_types_table . " nt
-			WHERE n.item_type = '" . $this->get_type() . "'
+			WHERE n.notification_type = '" . $this->get_type() . "'
 				AND n.item_parent_id = " . (int) self::get_item_parent_id($post) . '
 				AND n.unread = 1
-				AND nt.notification_type = n.item_type
+				AND nt.notification_type = n.notification_type
 				AND nt.notification_type_enabled = 1';
 		$result = $this->db->sql_query($sql);
 		while ($row = $this->db->sql_fetchrow($result))
@@ -133,7 +133,7 @@ class phpbb_notification_type_quote extends phpbb_notification_type_post
 			// Do not create a new notification
 			unset($notify_users[$row['user_id']]);
 
-			$notification = $this->notification_manager->get_item_type_class($this->get_type(), $row);
+			$notification = $this->notification_manager->get_notification_type_class($this->get_type(), $row);
 			$sql = 'UPDATE ' . $this->notifications_table . '
 				SET ' . $this->db->sql_build_array('UPDATE', $notification->add_responders($post)) . '
 				WHERE notification_id = ' . $row['notification_id'];
@@ -154,9 +154,9 @@ class phpbb_notification_type_quote extends phpbb_notification_type_post
 		$old_notifications = array();
 		$sql = 'SELECT n.user_id
 			FROM ' . $this->notifications_table . ' n, ' . $this->notification_types_table . " nt
-			WHERE n.item_type = '" . $this->get_type() . "'
+			WHERE n.notification_type = '" . $this->get_type() . "'
 				AND n.item_id = " . self::get_item_id($post) . '
-				AND nt.notification_type = n.item_type
+				AND nt.notification_type = n.notification_type
 				AND nt.notification_type_enabled = 1';
 		$result = $this->db->sql_query($sql);
 		while ($row = $this->db->sql_fetchrow($result))
@@ -185,7 +185,7 @@ class phpbb_notification_type_quote extends phpbb_notification_type_post
 		if (!empty($remove_notifications))
 		{
 			$sql = 'DELETE FROM ' . $this->notifications_table . "
-				WHERE item_type = '" . $this->get_type() . "'
+				WHERE notification_type = '" . $this->get_type() . "'
 					AND item_id = " . self::get_item_id($post) . '
 					AND ' . $this->db->sql_in_set('user_id', $remove_notifications);
 			$this->db->sql_query($sql);

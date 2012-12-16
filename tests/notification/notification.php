@@ -201,7 +201,7 @@ class phpbb_notification_test extends phpbb_database_test_case
 
 		$expected = array(
 			1 => array(
-				'item_type'			=> 'test',
+				'notification_type'	=> 'test',
 				'item_id'			=> 1,
 				'item_parent_id'	=> 1,
 				'user_id'	   		=> 0,
@@ -210,7 +210,7 @@ class phpbb_notification_test extends phpbb_database_test_case
 				'data'				=> array(),
 			),
 			2 => array(
-				'item_type'			=> 'test',
+				'notification_type'	=> 'test',
 				'item_id'			=> 2,
 				'item_parent_id'	=> 2,
 				'user_id'	   		=> 0,
@@ -219,7 +219,7 @@ class phpbb_notification_test extends phpbb_database_test_case
 				'data'				=> array(),
 			),
 			3 => array(
-				'item_type'			=> 'test',
+				'notification_type'	=> 'test',
 				'item_id'			=> 3,
 				'item_parent_id'	=> 2,
 				'user_id'	   		=> 0,
@@ -228,7 +228,7 @@ class phpbb_notification_test extends phpbb_database_test_case
 				'data'				=> array(),
 			),
 			4 => array(
-				'item_type'			=> 'post',
+				'notification_type'	=> 'post',
 				'item_id'			=> 4,
 				'item_parent_id'	=> 2,
 				'user_id'	   		=> 0,
@@ -244,7 +244,7 @@ class phpbb_notification_test extends phpbb_database_test_case
 				),
 			),
 			5 => array(
-				'item_type'			=> 'bookmark',
+				'notification_type'	=> 'bookmark',
 				'item_id'			=> 5,
 				'item_parent_id'	=> 2,
 				'user_id'	   		=> 0,
@@ -307,7 +307,7 @@ class phpbb_notification_test extends phpbb_database_test_case
 
 		$expected = array(
 			1 => array(
-				'item_type'			=> 'test',
+				'notification_type'	=> 'test',
 				'item_id'			=> 1,
 				'item_parent_id'	=> 2,
 				'user_id'	   		=> 0,
@@ -316,7 +316,7 @@ class phpbb_notification_test extends phpbb_database_test_case
 				'data'				=> array(),
 			),
 			2 => array(
-				'item_type'			=> 'test',
+				'notification_type'	=> 'test',
 				'item_id'			=> 2,
 				'item_parent_id'	=> 2,
 				'user_id'	   		=> 0,
@@ -325,7 +325,7 @@ class phpbb_notification_test extends phpbb_database_test_case
 				'data'				=> array(),
 			),
 			3 => array(
-				'item_type'			=> 'test',
+				'notification_type'	=> 'test',
 				'item_id'			=> 3,
 				'item_parent_id'	=> 2,
 				'user_id'	   		=> 0,
@@ -334,7 +334,7 @@ class phpbb_notification_test extends phpbb_database_test_case
 				'data'				=> array(),
 			),
 			4 => array(
-				'item_type'			=> 'post',
+				'notification_type'	=> 'post',
 				'item_id'			=> 4,
 				'item_parent_id'	=> 2,
 				'user_id'	   		=> 0,
@@ -350,7 +350,7 @@ class phpbb_notification_test extends phpbb_database_test_case
 				),
 			),
 			5 => array(
-				'item_type'			=> 'bookmark',
+				'notification_type'	=> 'bookmark',
 				'item_id'			=> 5,
 				'item_parent_id'	=> 2,
 				'user_id'	   		=> 0,
