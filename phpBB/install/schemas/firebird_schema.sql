@@ -1246,7 +1246,7 @@ CREATE TABLE phpbb_user_notifications (
 	notification_type_id INTEGER DEFAULT 0 NOT NULL,
 	user_id INTEGER DEFAULT 0 NOT NULL,
 	notification_method VARCHAR(255) CHARACTER SET NONE DEFAULT '' NOT NULL,
-	notify INTEGER DEFAULT 1 NOT NULL
+	notification_notify INTEGER DEFAULT 1 NOT NULL
 );;
 
 ALTER TABLE phpbb_user_notifications ADD PRIMARY KEY (notification_type, notification_type_id, user_id, notification_method);;

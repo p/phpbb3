@@ -355,7 +355,7 @@ abstract class phpbb_notification_type_base implements phpbb_notification_type_i
 
 		$rowset = $resulting_user_ids = array();
 
-		$sql = 'SELECT user_id, notification_method, notify
+		$sql = 'SELECT user_id, notification_method, notification_notify
 			FROM ' . $this->user_notifications_table . '
 			WHERE ' . $this->db->sql_in_set('user_id', $user_ids) . "
 				AND notification_type = '" . $this->db->sql_escape($options['notification_type']) . "'
@@ -366,7 +366,7 @@ abstract class phpbb_notification_type_base implements phpbb_notification_type_i
 		{
 			$resulting_user_ids[] = $row['user_id'];
 
-			if (!$row['notify'] || (isset($options['ignore_users'][$row['user_id']]) && in_array($row['notification_method'], $options['ignore_users'][$row['user_id']])))
+			if (!$row['notification_notify'] || (isset($options['ignore_users'][$row['user_id']]) && in_array($row['notification_method'], $options['ignore_users'][$row['user_id']])))
 			{
 				continue;
 			}

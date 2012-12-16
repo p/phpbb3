@@ -1531,7 +1531,7 @@ CREATE TABLE [phpbb_user_notifications] (
 	[notification_type_id] [int] DEFAULT (0) NOT NULL ,
 	[user_id] [int] DEFAULT (0) NOT NULL ,
 	[notification_method] [varchar] (255) DEFAULT ('') NOT NULL ,
-	[notify] [int] DEFAULT (1) NOT NULL 
+	[notification_notify] [int] DEFAULT (1) NOT NULL 
 ) ON [PRIMARY]
 GO
 

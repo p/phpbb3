@@ -881,7 +881,7 @@ CREATE TABLE phpbb_user_notifications (
 	notification_type_id mediumint(8) UNSIGNED DEFAULT '0' NOT NULL,
 	user_id mediumint(8) UNSIGNED DEFAULT '0' NOT NULL,
 	notification_method varbinary(255) DEFAULT '' NOT NULL,
-	notify tinyint(1) UNSIGNED DEFAULT '1' NOT NULL,
+	notification_notify tinyint(1) UNSIGNED DEFAULT '1' NOT NULL,
 	PRIMARY KEY (notification_type, notification_type_id, user_id, notification_method)
 );
 

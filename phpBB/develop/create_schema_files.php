@@ -1785,7 +1785,7 @@ function get_schema_struct()
 			'notification_type_id'		=> array('UINT', 0),
 			'user_id'					=> array('UINT', 0),
 			'notification_method'		=> array('VCHAR:255', ''),
-			'notify'					=> array('BOOL', 1),
+			'notification_notify'		=> array('BOOL', 1),
 		),
 		'PRIMARY_KEY'		=> array(
 			'notification_type',

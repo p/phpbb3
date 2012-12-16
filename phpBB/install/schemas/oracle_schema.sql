@@ -1647,7 +1647,7 @@ CREATE TABLE phpbb_user_notifications (
 	notification_type_id number(8) DEFAULT '0' NOT NULL,
 	user_id number(8) DEFAULT '0' NOT NULL,
 	notification_method varchar2(255) DEFAULT '' ,
-	notify number(1) DEFAULT '1' NOT NULL,
+	notification_notify number(1) DEFAULT '1' NOT NULL,
 	CONSTRAINT pk_phpbb_user_notifications PRIMARY KEY (notification_type, notification_type_id, user_id, notification_method)
 )
 /
