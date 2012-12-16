@@ -630,8 +630,8 @@ ALTER TABLE phpbb_notification_types ADD PRIMARY KEY (notification_type, notific
 # Table: 'phpbb_notifications'
 CREATE TABLE phpbb_notifications (
 	notification_id INTEGER NOT NULL,
-	item_type VARCHAR(255) CHARACTER SET NONE DEFAULT '' NOT NULL,
-	item_id INTEGER DEFAULT 0 NOT NULL,
+	notification_type VARCHAR(255) CHARACTER SET NONE DEFAULT '' NOT NULL,
+	notification_type_id INTEGER DEFAULT 0 NOT NULL,
 	item_parent_id INTEGER DEFAULT 0 NOT NULL,
 	user_id INTEGER DEFAULT 0 NOT NULL,
 	unread INTEGER DEFAULT 1 NOT NULL,
@@ -641,7 +641,7 @@ CREATE TABLE phpbb_notifications (
 
 ALTER TABLE phpbb_notifications ADD PRIMARY KEY (notification_id);;
 
-CREATE INDEX phpbb_notifications_item_ident ON phpbb_notifications(item_type, item_id);;
+CREATE INDEX phpbb_notifications_type_ident ON phpbb_notifications(notification_type, notification_type_id);;
 CREATE INDEX phpbb_notifications_user ON phpbb_notifications(user_id, unread);;
 
 CREATE GENERATOR phpbb_notifications_gen;;
@@ -1242,14 +1242,14 @@ CREATE INDEX phpbb_topics_watch_notify_stat ON phpbb_topics_watch(notify_status)
 
 # Table: 'phpbb_user_notifications'
 CREATE TABLE phpbb_user_notifications (
-	item_type VARCHAR(255) CHARACTER SET NONE DEFAULT '' NOT NULL,
-	item_id INTEGER DEFAULT 0 NOT NULL,
+	notification_type VARCHAR(255) CHARACTER SET NONE DEFAULT '' NOT NULL,
+	notification_type_id INTEGER DEFAULT 0 NOT NULL,
 	user_id INTEGER DEFAULT 0 NOT NULL,
-	method VARCHAR(255) CHARACTER SET NONE DEFAULT '' NOT NULL,
+	notification_method VARCHAR(255) CHARACTER SET NONE DEFAULT '' NOT NULL,
 	notify INTEGER DEFAULT 1 NOT NULL
 );;
 
-ALTER TABLE phpbb_user_notifications ADD PRIMARY KEY (item_type, item_id, user_id, method);;
+ALTER TABLE phpbb_user_notifications ADD PRIMARY KEY (notification_type, notification_type_id, user_id, notification_method);;
 
 
 # Table: 'phpbb_user_group'

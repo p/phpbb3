@@ -428,8 +428,8 @@ CREATE TABLE phpbb_notification_types (
 # Table: 'phpbb_notifications'
 CREATE TABLE phpbb_notifications (
 	notification_id INTEGER PRIMARY KEY NOT NULL ,
-	item_type varchar(255) NOT NULL DEFAULT '',
-	item_id INTEGER UNSIGNED NOT NULL DEFAULT '0',
+	notification_type varchar(255) NOT NULL DEFAULT '',
+	notification_type_id INTEGER UNSIGNED NOT NULL DEFAULT '0',
 	item_parent_id INTEGER UNSIGNED NOT NULL DEFAULT '0',
 	user_id INTEGER UNSIGNED NOT NULL DEFAULT '0',
 	unread INTEGER UNSIGNED NOT NULL DEFAULT '1',
@@ -437,7 +437,7 @@ CREATE TABLE phpbb_notifications (
 	data text(65535) NOT NULL DEFAULT ''
 );
 
-CREATE INDEX phpbb_notifications_item_ident ON phpbb_notifications (item_type, item_id);
+CREATE INDEX phpbb_notifications_type_ident ON phpbb_notifications (notification_type, notification_type_id);
 CREATE INDEX phpbb_notifications_user ON phpbb_notifications (user_id, unread);
 
 # Table: 'phpbb_poll_options'
@@ -850,12 +850,12 @@ CREATE INDEX phpbb_topics_watch_notify_stat ON phpbb_topics_watch (notify_status
 
 # Table: 'phpbb_user_notifications'
 CREATE TABLE phpbb_user_notifications (
-	item_type varchar(255) NOT NULL DEFAULT '',
-	item_id INTEGER UNSIGNED NOT NULL DEFAULT '0',
+	notification_type varchar(255) NOT NULL DEFAULT '',
+	notification_type_id INTEGER UNSIGNED NOT NULL DEFAULT '0',
 	user_id INTEGER UNSIGNED NOT NULL DEFAULT '0',
-	method varchar(255) NOT NULL DEFAULT '',
+	notification_method varchar(255) NOT NULL DEFAULT '',
 	notify INTEGER UNSIGNED NOT NULL DEFAULT '1',
-	PRIMARY KEY (item_type, item_id, user_id, method)
+	PRIMARY KEY (notification_type, notification_type_id, user_id, notification_method)
 );
 
 

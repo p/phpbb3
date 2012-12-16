@@ -1204,23 +1204,23 @@ function database_update_info()
 					),
 					'PRIMARY_KEY'		=> 'notification_id',
 					'KEYS'				=> array(
-						'notification_type_ident'		=> array('INDEX', array('notification_type', 'notification_type_id')),
+						'type_ident'		=> array('INDEX', array('notification_type', 'notification_type_id')),
 						'user'				=> array('INDEX', array('user_id', 'unread')),
 					),
 				),
 				USER_NOTIFICATIONS_TABLE	=> array(
 					'COLUMNS'			=> array(
-						'notification_type'	=> array('VCHAR:255', ''),
+						'notification_type'				=> array('VCHAR:255', ''),
 						'notification_type_id'			=> array('UINT', 0),
-						'user_id'			=> array('UINT', 0),
-						'method'			=> array('VCHAR:255', ''),
-						'notify'			=> array('BOOL', 1),
+						'user_id'						=> array('UINT', 0),
+						'notification_method'	  		=> array('VCHAR:255', ''),
+						'notify'		   				=> array('BOOL', 1),
 					),
 					'PRIMARY_KEY'		=> array(
 						'notification_type',
 						'notification_type_id',
 						'user_id',
-						'method',
+						'notification_method',
 					),
 				),
 			),
@@ -3033,18 +3033,18 @@ function change_database_data(&$no_updates, $version)
 						{
 							_sql('INSERT INTO ' . $table_prefix . 'user_notifications ' . $db->sql_build_array('INSERT', array(
 								'notification_type'		=> $convert_data['notification_type'],
-								'notification_type_id'				=> 0,
+								'notification_type_id'	=> 0,
 								'user_id'				=> $row['user_id'],
-								'method'				=> '',
+								'notification_method'	=> '',
 							)), $errored, $error_ary);
 
 							if ($row['user_notify_type'] == NOTIFY_EMAIL || $row['user_notify_type'] == NOTIFY_BOTH)
 							{
 								_sql('INSERT INTO ' . $table_prefix . 'user_notifications ' . $db->sql_build_array('INSERT', array(
 									'notification_type'		=> $convert_data['notification_type'],
-									'notification_type_id'				=> 0,
+									'notification_type_id'	=> 0,
 									'user_id'				=> $row['user_id'],
-									'method'				=> 'email',
+									'notification_method'	=> 'email',
 								)), $errored, $error_ary);
 							}
 
@@ -3052,9 +3052,9 @@ function change_database_data(&$no_updates, $version)
 							{
 								_sql('INSERT INTO ' . $table_prefix . 'user_notifications ' . $db->sql_build_array('INSERT', array(
 									'notification_type'		=> $convert_data['notification_type'],
-									'notification_type_id'				=> 0,
+									'notification_type_id'	=> 0,
 									'user_id'				=> $row['user_id'],
-									'method'				=> 'jabber',
+									'notification_method'	=> 'jabber',
 								)), $errored, $error_ary);
 							}
 						}

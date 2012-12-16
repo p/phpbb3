@@ -1316,7 +1316,7 @@ function get_schema_struct()
 		),
 		'PRIMARY_KEY'		=> 'notification_id',
 		'KEYS'				=> array(
-			'notification_type_ident'		=> array('INDEX', array('notification_type', 'notification_type_id')),
+			'type_ident'		=> array('INDEX', array('notification_type', 'notification_type_id')),
 			'user'				=> array('INDEX', array('user_id', 'unread')),
 		),
 	);
@@ -1781,17 +1781,17 @@ function get_schema_struct()
 
 	$schema_data['phpbb_user_notifications'] = array(
 		'COLUMNS'			=> array(
-			'notification_type'	=> array('VCHAR:255', ''),
-			'notification_type_id'			=> array('UINT', 0),
-			'user_id'			=> array('UINT', 0),
-			'method'			=> array('VCHAR:255', ''),
-			'notify'			=> array('BOOL', 1),
+			'notification_type'			=> array('VCHAR:255', ''),
+			'notification_type_id'		=> array('UINT', 0),
+			'user_id'					=> array('UINT', 0),
+			'notification_method'		=> array('VCHAR:255', ''),
+			'notify'					=> array('BOOL', 1),
 		),
 		'PRIMARY_KEY'		=> array(
 			'notification_type',
 			'notification_type_id',
 			'user_id',
-			'method',
+			'notification_method',
 		),
 	);
 

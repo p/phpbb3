@@ -613,8 +613,8 @@ CREATE SEQUENCE phpbb_notifications_seq;
 
 CREATE TABLE phpbb_notifications (
 	notification_id INT4 DEFAULT nextval('phpbb_notifications_seq'),
-	item_type varchar(255) DEFAULT '' NOT NULL,
-	item_id INT4 DEFAULT '0' NOT NULL CHECK (item_id >= 0),
+	notification_type varchar(255) DEFAULT '' NOT NULL,
+	notification_type_id INT4 DEFAULT '0' NOT NULL CHECK (notification_type_id >= 0),
 	item_parent_id INT4 DEFAULT '0' NOT NULL CHECK (item_parent_id >= 0),
 	user_id INT4 DEFAULT '0' NOT NULL CHECK (user_id >= 0),
 	unread INT2 DEFAULT '1' NOT NULL CHECK (unread >= 0),
@@ -623,7 +623,7 @@ CREATE TABLE phpbb_notifications (
 	PRIMARY KEY (notification_id)
 );
 
-CREATE INDEX phpbb_notifications_item_ident ON phpbb_notifications (item_type, item_id);
+CREATE INDEX phpbb_notifications_type_ident ON phpbb_notifications (notification_type, notification_type_id);
 CREATE INDEX phpbb_notifications_user ON phpbb_notifications (user_id, unread);
 
 /*
@@ -1129,12 +1129,12 @@ CREATE INDEX phpbb_topics_watch_notify_stat ON phpbb_topics_watch (notify_status
 	Table: 'phpbb_user_notifications'
 */
 CREATE TABLE phpbb_user_notifications (
-	item_type varchar(255) DEFAULT '' NOT NULL,
-	item_id INT4 DEFAULT '0' NOT NULL CHECK (item_id >= 0),
+	notification_type varchar(255) DEFAULT '' NOT NULL,
+	notification_type_id INT4 DEFAULT '0' NOT NULL CHECK (notification_type_id >= 0),
 	user_id INT4 DEFAULT '0' NOT NULL CHECK (user_id >= 0),
-	method varchar(255) DEFAULT '' NOT NULL,
+	notification_method varchar(255) DEFAULT '' NOT NULL,
 	notify INT2 DEFAULT '1' NOT NULL CHECK (notify >= 0),
-	PRIMARY KEY (item_type, item_id, user_id, method)
+	PRIMARY KEY (notification_type, notification_type_id, user_id, notification_method)
 );
 
 

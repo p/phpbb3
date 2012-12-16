@@ -856,8 +856,8 @@ CREATE TABLE phpbb_notification_types (
 */
 CREATE TABLE phpbb_notifications (
 	notification_id number(8) NOT NULL,
-	item_type varchar2(255) DEFAULT '' ,
-	item_id number(8) DEFAULT '0' NOT NULL,
+	notification_type varchar2(255) DEFAULT '' ,
+	notification_type_id number(8) DEFAULT '0' NOT NULL,
 	item_parent_id number(8) DEFAULT '0' NOT NULL,
 	user_id number(8) DEFAULT '0' NOT NULL,
 	unread number(1) DEFAULT '1' NOT NULL,
@@ -867,7 +867,7 @@ CREATE TABLE phpbb_notifications (
 )
 /
 
-CREATE INDEX phpbb_notifications_item_ident ON phpbb_notifications (item_type, item_id)
+CREATE INDEX phpbb_notifications_type_ident ON phpbb_notifications (notification_type, notification_type_id)
 /
 CREATE INDEX phpbb_notifications_user ON phpbb_notifications (user_id, unread)
 /
@@ -1643,12 +1643,12 @@ CREATE INDEX phpbb_topics_watch_notify_stat ON phpbb_topics_watch (notify_status
 	Table: 'phpbb_user_notifications'
 */
 CREATE TABLE phpbb_user_notifications (
-	item_type varchar2(255) DEFAULT '' ,
-	item_id number(8) DEFAULT '0' NOT NULL,
+	notification_type varchar2(255) DEFAULT '' ,
+	notification_type_id number(8) DEFAULT '0' NOT NULL,
 	user_id number(8) DEFAULT '0' NOT NULL,
-	method varchar2(255) DEFAULT '' ,
+	notification_method varchar2(255) DEFAULT '' ,
 	notify number(1) DEFAULT '1' NOT NULL,
-	CONSTRAINT pk_phpbb_user_notifications PRIMARY KEY (item_type, item_id, user_id, method)
+	CONSTRAINT pk_phpbb_user_notifications PRIMARY KEY (notification_type, notification_type_id, user_id, notification_method)
 )
 /
 

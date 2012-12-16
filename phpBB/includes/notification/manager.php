@@ -588,7 +588,7 @@ class phpbb_notification_manager
 		{
 			foreach ($types as $id => $type)
 			{
-				$sql = 'SELECT method, notify
+				$sql = 'SELECT notification_method, notify
 					FROM ' . $this->user_notifications_table . '
 					WHERE user_id = ' . (int) $user_id . "
 						AND notification_type = '" . $this->db->sql_escape($id) . "'
@@ -615,7 +615,7 @@ class phpbb_notification_manager
 							$subscriptions[$id] = array();
 						}
 
-						$subscriptions[$id][] = $row['method'];
+						$subscriptions[$id][] = $row['notification_method'];
 					}
 					while ($row = $this->db->sql_fetchrow($result));
 				}
@@ -649,7 +649,7 @@ class phpbb_notification_manager
 			WHERE notification_type = '" . $this->db->sql_escape($notification_type) . "'
 				AND notification_type_id = " . (int) $notification_type_id . '
 				AND user_id = ' .(int) $user_id . "
-				AND method = '" . $this->db->sql_escape($method) . "'";
+				AND notification_method = '" . $this->db->sql_escape($method) . "'";
 		$this->db->sql_query($sql);
 		$current = $this->db->sql_fetchfield('notify');
 		$this->db->sql_freeresult();
@@ -661,7 +661,7 @@ class phpbb_notification_manager
 					'notification_type'		=> $notification_type,
 					'notification_type_id'		=> (int) $notification_type_id,
 					'user_id'		=> (int) $user_id,
-					'method'		=> $method,
+					'notification_method'		=> $method,
 					'notify'		=> 1,
 				));
 			$this->db->sql_query($sql);
@@ -673,7 +673,7 @@ class phpbb_notification_manager
 				WHERE notification_type = '" . $this->db->sql_escape($notification_type) . "'
 					AND notification_type_id = " . (int) $notification_type_id . '
 					AND user_id = ' .(int) $user_id . "
-					AND method = '" . $this->db->sql_escape($method) . "'";
+					AND notification_method = '" . $this->db->sql_escape($method) . "'";
 			$this->db->sql_query($sql);
 		}
 	}
@@ -698,7 +698,7 @@ class phpbb_notification_manager
 				WHERE notification_type = '" . $this->db->sql_escape($notification_type) . "'
 					AND notification_type_id = " . (int) $notification_type_id . '
 					AND user_id = ' .(int) $user_id . "
-					AND method <> ''
+					AND notification_method <> ''
 					AND notify = 1";
 			$this->db->sql_query($sql);
 			$num_notifications = $this->db->sql_fetchfield('num_notifications');
@@ -715,7 +715,7 @@ class phpbb_notification_manager
 			WHERE notification_type = '" . $this->db->sql_escape($notification_type) . "'
 				AND notification_type_id = " . (int) $notification_type_id . '
 				AND user_id = ' .(int) $user_id . "
-				AND method = '" . $this->db->sql_escape($method) . "'";
+				AND notification_method = '" . $this->db->sql_escape($method) . "'";
 		$this->db->sql_query($sql);
 
 		if (!$this->db->sql_affectedrows())
@@ -725,7 +725,7 @@ class phpbb_notification_manager
 					'notification_type'		=> $notification_type,
 					'notification_type_id'		=> (int) $notification_type_id,
 					'user_id'		=> (int) $user_id,
-					'method'		=> $method,
+					'notification_method'		=> $method,
 					'notify'		=> 0,
 				));
 			$this->db->sql_query($sql);
