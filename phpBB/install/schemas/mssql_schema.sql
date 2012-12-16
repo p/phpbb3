@@ -778,7 +778,7 @@ CREATE TABLE [phpbb_notifications] (
 	[notification_type_id] [int] DEFAULT (0) NOT NULL ,
 	[item_parent_id] [int] DEFAULT (0) NOT NULL ,
 	[user_id] [int] DEFAULT (0) NOT NULL ,
-	[unread] [int] DEFAULT (1) NOT NULL ,
+	[notification_read] [int] DEFAULT (0) NOT NULL ,
 	[notification_time] [int] DEFAULT (1) NOT NULL ,
 	[data] [varchar] (4000) DEFAULT ('') NOT NULL 
 ) ON [PRIMARY]
@@ -794,7 +794,7 @@ GO
 CREATE  INDEX [type_ident] ON [phpbb_notifications]([notification_type], [notification_type_id]) ON [PRIMARY]
 GO
 
-CREATE  INDEX [user] ON [phpbb_notifications]([user_id], [unread]) ON [PRIMARY]
+CREATE  INDEX [user] ON [phpbb_notifications]([user_id], [notification_read]) ON [PRIMARY]
 GO
 
 
