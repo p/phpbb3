@@ -22,7 +22,7 @@ class phpbb_notification_type_test extends phpbb_notification_type_base
 		return 'test';
 	}
 
-	public static function get_item_id($post)
+	public static function get_notification_type_id($post)
 	{
 		return (int) $post['post_id'];
 	}

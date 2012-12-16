@@ -40,7 +40,7 @@ interface phpbb_notification_type_interface
 	*
 	* @param array $type_data The type specific data
 	*/
-	public static function get_item_id($type_data);
+	public static function get_notification_type_id($type_data);
 
 	/**
 	* Get the id of the parent

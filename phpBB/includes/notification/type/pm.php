@@ -56,7 +56,7 @@ class phpbb_notification_type_pm extends phpbb_notification_type_base
 	*
 	* @param array $pm The data from the private message
 	*/
-	public static function get_item_id($pm)
+	public static function get_notification_type_id($pm)
 	{
 		return (int) $pm['msg_id'];
 	}
@@ -140,7 +140,7 @@ class phpbb_notification_type_pm extends phpbb_notification_type_base
 			'AUTHOR_NAME'				=> htmlspecialchars_decode($user_data['username']),
 			'SUBJECT'					=> htmlspecialchars_decode(censor_text($this->get_data('message_subject'))),
 
-			'U_VIEW_MESSAGE'			=> generate_board_url() . '/ucp.' . $this->php_ext . "?i=pm&mode=view&p={$this->item_id}",
+			'U_VIEW_MESSAGE'			=> generate_board_url() . '/ucp.' . $this->php_ext . "?i=pm&mode=view&p={$this->notification_type_id}",
 		);
 	}
 
@@ -151,7 +151,7 @@ class phpbb_notification_type_pm extends phpbb_notification_type_base
 	*/
 	public function get_url()
 	{
-		return append_sid($this->phpbb_root_path . 'ucp.' . $this->php_ext, "i=pm&amp;mode=view&amp;p={$this->item_id}");
+		return append_sid($this->phpbb_root_path . 'ucp.' . $this->php_ext, "i=pm&amp;mode=view&amp;p={$this->notification_type_id}");
 	}
 
 	/**

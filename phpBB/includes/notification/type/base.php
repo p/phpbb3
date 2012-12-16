@@ -68,7 +68,7 @@ abstract class phpbb_notification_type_base implements phpbb_notification_type_i
 	/**
 	* Indentification data
 	* notification_type			- Type of the item (translates to the notification type)
-	* item_id			- ID of the item (e.g. post_id, msg_id)
+	* notification_type_id			- ID of the item (e.g. post_id, msg_id)
 	* item_parent_id	- Parent item id (ex: for topic => forum_id, for post => topic_id, etc)
 	* user_id
 	* unread
@@ -164,7 +164,7 @@ abstract class phpbb_notification_type_base implements phpbb_notification_type_i
 	{
 		// Defaults
 		$this->data = array_merge(array(
-			'item_id'				=> static::get_item_id($type_data),
+			'notification_type_id'				=> static::get_notification_type_id($type_data),
 			'notification_type'	   			=> $this->get_type(),
 			'item_parent_id'		=> static::get_item_parent_id($type_data),
 
@@ -329,7 +329,7 @@ abstract class phpbb_notification_type_base implements phpbb_notification_type_i
 		$options = array_merge(array(
 			'ignore_users'		=> array(),
 			'notification_type'			=> $this->get_type(),
-			'item_id'			=> 0, // Global by default
+			'notification_type_id'			=> 0, // Global by default
 		), $options);
 
 		if ($user_ids === false)
@@ -359,7 +359,7 @@ abstract class phpbb_notification_type_base implements phpbb_notification_type_i
 			FROM ' . $this->user_notifications_table . '
 			WHERE ' . $this->db->sql_in_set('user_id', $user_ids) . "
 				AND notification_type = '" . $this->db->sql_escape($options['notification_type']) . "'
-				AND item_id = " . (int) $options['item_id'];
+				AND notification_type_id = " . (int) $options['notification_type_id'];
 		$result = $this->db->sql_query($sql);
 
 		while ($row = $this->db->sql_fetchrow($result))
@@ -406,7 +406,7 @@ abstract class phpbb_notification_type_base implements phpbb_notification_type_i
 
 		$where = array(
 			"notification_type = '" . $this->db->sql_escape($this->notification_type) . "'",
-			'item_id = ' . (int) $this->item_id,
+			'notification_type_id = ' . (int) $this->notification_type_id,
 			'user_id = ' . (int) $this->user_id,
 		);
 		$where = implode(' AND ', $where);

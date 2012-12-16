@@ -99,8 +99,8 @@ class phpbb_notification_type_report_post extends phpbb_notification_type_post_i
 			'POST_SUBJECT'				=> htmlspecialchars_decode(censor_text($this->get_data('post_subject'))),
 			'TOPIC_TITLE'				=> htmlspecialchars_decode(censor_text($this->get_data('topic_title'))),
 
-			'U_VIEW_REPORT'				=> "{$board_url}mcp.{$this->php_ext}?f={$this->get_data('forum_id')}&amp;p={$this->item_id}&amp;i=reports&amp;mode=report_details#reports",
-			'U_VIEW_POST'				=> "{$board_url}/viewtopic.{$this->php_ext}?p={$this->item_id}#p{$this->item_id}",
+			'U_VIEW_REPORT'				=> "{$board_url}mcp.{$this->php_ext}?f={$this->get_data('forum_id')}&amp;p={$this->notification_type_id}&amp;i=reports&amp;mode=report_details#reports",
+			'U_VIEW_POST'				=> "{$board_url}/viewtopic.{$this->php_ext}?p={$this->notification_type_id}#p{$this->notification_type_id}",
 			'U_NEWEST_POST'				=> "{$board_url}/viewtopic.{$this->php_ext}?f={$this->get_data('forum_id')}&t={$this->item_parent_id}&view=unread#unread",
 			'U_TOPIC'					=> "{$board_url}/viewtopic.{$this->php_ext}?f={$this->get_data('forum_id')}&t={$this->item_parent_id}",
 			'U_VIEW_TOPIC'				=> "{$board_url}/viewtopic.{$this->php_ext}?f={$this->get_data('forum_id')}&t={$this->item_parent_id}",
@@ -115,7 +115,7 @@ class phpbb_notification_type_report_post extends phpbb_notification_type_post_i
 	*/
 	public function get_url()
 	{
-		return append_sid($this->phpbb_root_path . 'mcp.' . $this->php_ext, "f={$this->get_data('forum_id')}&amp;p={$this->item_id}&amp;i=reports&amp;mode=report_details#reports");
+		return append_sid($this->phpbb_root_path . 'mcp.' . $this->php_ext, "f={$this->get_data('forum_id')}&amp;p={$this->notification_type_id}&amp;i=reports&amp;mode=report_details#reports");
 	}
 
 	/**

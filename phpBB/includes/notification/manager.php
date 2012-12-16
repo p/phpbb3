@@ -228,11 +228,11 @@ class phpbb_notification_manager
 	* Mark notifications read
 	*
 	* @param bool|string|array $notification_type Type identifier or array of item types (only acceptable if the $data is identical for the specified types). False to mark read for all item types
-	* @param bool|int|array $item_id Item id or array of item ids. False to mark read for all item ids
+	* @param bool|int|array $notification_type_id Item id or array of item ids. False to mark read for all item ids
 	* @param bool|int|array $user_id User id or array of user ids. False to mark read for all user ids
 	* @param bool|int $time Time at which to mark all notifications prior to as read. False to mark all as read. (Default: False)
 	*/
-	public function mark_notifications_read($notification_type, $item_id, $user_id, $time = false)
+	public function mark_notifications_read($notification_type, $notification_type_id, $user_id, $time = false)
 	{
 		$time = ($time !== false) ? $time : time();
 
@@ -240,7 +240,7 @@ class phpbb_notification_manager
 			SET unread = 0
 			WHERE time <= " . $time .
 				(($notification_type !== false) ? ' AND ' . (is_array($notification_type) ? $this->db->sql_in_set('notification_type', $notification_type) : " notification_type = '" . $this->db->sql_escape($notification_type) . "'") : '') .
-				(($item_id !== false) ? ' AND ' . (is_array($item_id) ? $this->db->sql_in_set('item_id', $item_id) : 'item_id = ' . (int) $item_id) : '') .
+				(($notification_type_id !== false) ? ' AND ' . (is_array($notification_type_id) ? $this->db->sql_in_set('notification_type_id', $notification_type_id) : 'notification_type_id = ' . (int) $notification_type_id) : '') .
 				(($user_id !== false) ? ' AND ' . (is_array($user_id) ? $this->db->sql_in_set('user_id', $user_id) : 'user_id = ' . (int) $user_id) : '');
 		$this->db->sql_query($sql);
 	}
@@ -324,7 +324,7 @@ class phpbb_notification_manager
 			return $notified_users;
 		}
 
-		$item_id = $this->get_notification_type_class($notification_type)->get_item_id($data);
+		$notification_type_id = $this->get_notification_type_class($notification_type)->get_notification_type_id($data);
 
 		// find out which users want to receive this type of notification
 		$notify_users = $this->get_notification_type_class($notification_type)->find_users_for_notification($data, $options);
@@ -370,7 +370,7 @@ class phpbb_notification_manager
 
 		$this->db->sql_freeresult($result);
 
-		$item_id = $this->get_notification_type_class($notification_type)->get_item_id($data);
+		$notification_type_id = $this->get_notification_type_class($notification_type)->get_notification_type_id($data);
 
 		$user_ids = array();
 		$notification_objects = $notification_methods = array();
@@ -384,7 +384,7 @@ class phpbb_notification_manager
 		$sql = 'SELECT n.user_id
 			FROM ' . $this->notifications_table . ' n, ' . $this->notification_types_table . " nt
 			WHERE n.notification_type = '" . $this->db->sql_escape($notification_type) . "'
-				AND n.item_id = " . (int) $item_id . '
+				AND n.notification_type_id = " . (int) $notification_type_id . '
 				AND nt.notification_type = n.notification_type
 				AND nt.notification_type_enabled = 1';
 		$result = $this->db->sql_query($sql);
@@ -475,30 +475,30 @@ class phpbb_notification_manager
 			}
 		}
 
-		$item_id = $notification->get_item_id($data);
+		$notification_type_id = $notification->get_notification_type_id($data);
 		$update_array = $notification->create_update_array($data);
 
 		$sql = 'UPDATE ' . $this->notifications_table . '
 			SET ' . $this->db->sql_build_array('UPDATE', $update_array) . "
 			WHERE notification_type = '" . $this->db->sql_escape($notification_type) . "'
-				AND item_id = " . (int) $item_id;
+				AND notification_type_id = " . (int) $notification_type_id;
 		$this->db->sql_query($sql);
 	}
 
 	/**
 	* Delete a notification
 	*
-	* @param string|array $notification_type Type identifier or array of item types (only acceptable if the $item_id is identical for the specified types)
-	* @param int|array $item_id Identifier within the type (or array of ids)
+	* @param string|array $notification_type Type identifier or array of item types (only acceptable if the $notification_type_id is identical for the specified types)
+	* @param int|array $notification_type_id Identifier within the type (or array of ids)
 	* @param array $data Data specific for this type that will be updated
 	*/
-	public function delete_notifications($notification_type, $item_id)
+	public function delete_notifications($notification_type, $notification_type_id)
 	{
 		if (is_array($notification_type))
 		{
 			foreach ($notification_type as $type)
 			{
-				$this->delete_notifications($type, $item_id);
+				$this->delete_notifications($type, $notification_type_id);
 			}
 
 			return;
@@ -506,7 +506,7 @@ class phpbb_notification_manager
 
 		$sql = 'DELETE FROM ' . $this->notifications_table . "
 			WHERE notification_type = '" . $this->db->sql_escape($notification_type) . "'
-				AND " . (is_array($item_id) ? $this->db->sql_in_set('item_id', $item_id) : 'item_id = ' . (int) $item_id);
+				AND " . (is_array($notification_type_id) ? $this->db->sql_in_set('notification_type_id', $notification_type_id) : 'notification_type_id = ' . (int) $notification_type_id);
 		$this->db->sql_query($sql);
 	}
 
@@ -572,7 +572,7 @@ class phpbb_notification_manager
 	}
 
 	/**
-	* Get global subscriptions (item_id = 0)
+	* Get global subscriptions (notification_type_id = 0)
 	*
 	* @param bool|int $user_id The user_id to add the subscription for (bool false for current user)
 	*
@@ -592,7 +592,7 @@ class phpbb_notification_manager
 					FROM ' . $this->user_notifications_table . '
 					WHERE user_id = ' . (int) $user_id . "
 						AND notification_type = '" . $this->db->sql_escape($id) . "'
-						AND item_id = 0";
+						AND notification_type_id = 0";
 				$result = $this->db->sql_query($sql);
 
 				$row = $this->db->sql_fetchrow($result);
@@ -631,11 +631,11 @@ class phpbb_notification_manager
 	* Add a subscription
 	*
 	* @param string $notification_type Type identifier of the subscription
-	* @param int $item_id The id of the item
+	* @param int $notification_type_id The id of the item
 	* @param string $method The method of the notification e.g. '', 'email', or 'jabber'
 	* @param bool|int $user_id The user_id to add the subscription for (bool false for current user)
 	*/
-	public function add_subscription($notification_type, $item_id = 0, $method = '', $user_id = false)
+	public function add_subscription($notification_type, $notification_type_id = 0, $method = '', $user_id = false)
 	{
 		if ($method !== '')
 		{
@@ -647,7 +647,7 @@ class phpbb_notification_manager
 		$sql = 'SELECT notify
 			FROM ' . $this->user_notifications_table . "
 			WHERE notification_type = '" . $this->db->sql_escape($notification_type) . "'
-				AND item_id = " . (int) $item_id . '
+				AND notification_type_id = " . (int) $notification_type_id . '
 				AND user_id = ' .(int) $user_id . "
 				AND method = '" . $this->db->sql_escape($method) . "'";
 		$this->db->sql_query($sql);
@@ -659,7 +659,7 @@ class phpbb_notification_manager
 			$sql = 'INSERT INTO ' . $this->user_notifications_table . ' ' .
 				$this->db->sql_build_array('INSERT', array(
 					'notification_type'		=> $notification_type,
-					'item_id'		=> (int) $item_id,
+					'notification_type_id'		=> (int) $notification_type_id,
 					'user_id'		=> (int) $user_id,
 					'method'		=> $method,
 					'notify'		=> 1,
@@ -671,7 +671,7 @@ class phpbb_notification_manager
 			$sql = 'UPDATE ' . $this->user_notifications_table . "
 				SET notify = 1
 				WHERE notification_type = '" . $this->db->sql_escape($notification_type) . "'
-					AND item_id = " . (int) $item_id . '
+					AND notification_type_id = " . (int) $notification_type_id . '
 					AND user_id = ' .(int) $user_id . "
 					AND method = '" . $this->db->sql_escape($method) . "'";
 			$this->db->sql_query($sql);
@@ -682,11 +682,11 @@ class phpbb_notification_manager
 	* Delete a subscription
 	*
 	* @param string $notification_type Type identifier of the subscription
-	* @param int $item_id The id of the item
+	* @param int $notification_type_id The id of the item
 	* @param string $method The method of the notification e.g. '', 'email', or 'jabber'
 	* @param bool|int $user_id The user_id to add the subscription for (bool false for current user)
 	*/
-	public function delete_subscription($notification_type, $item_id = 0, $method = '', $user_id = false)
+	public function delete_subscription($notification_type, $notification_type_id = 0, $method = '', $user_id = false)
 	{
 		$user_id = ($user_id === false) ? $this->user->data['user_id'] : $user_id;
 
@@ -696,7 +696,7 @@ class phpbb_notification_manager
 			$sql = 'SELECT COUNT(*) as num_notifications
 				FROM ' . $this->user_notifications_table . "
 				WHERE notification_type = '" . $this->db->sql_escape($notification_type) . "'
-					AND item_id = " . (int) $item_id . '
+					AND notification_type_id = " . (int) $notification_type_id . '
 					AND user_id = ' .(int) $user_id . "
 					AND method <> ''
 					AND notify = 1";
@@ -713,7 +713,7 @@ class phpbb_notification_manager
 		$sql = 'UPDATE ' . $this->user_notifications_table . "
 			SET notify = 0
 			WHERE notification_type = '" . $this->db->sql_escape($notification_type) . "'
-				AND item_id = " . (int) $item_id . '
+				AND notification_type_id = " . (int) $notification_type_id . '
 				AND user_id = ' .(int) $user_id . "
 				AND method = '" . $this->db->sql_escape($method) . "'";
 		$this->db->sql_query($sql);
@@ -723,7 +723,7 @@ class phpbb_notification_manager
 			$sql = 'INSERT INTO ' . $this->user_notifications_table . ' ' .
 				$this->db->sql_build_array('INSERT', array(
 					'notification_type'		=> $notification_type,
-					'item_id'		=> (int) $item_id,
+					'notification_type_id'		=> (int) $notification_type_id,
 					'user_id'		=> (int) $user_id,
 					'method'		=> $method,
 					'notify'		=> 0,

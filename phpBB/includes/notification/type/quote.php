@@ -155,7 +155,7 @@ class phpbb_notification_type_quote extends phpbb_notification_type_post
 		$sql = 'SELECT n.user_id
 			FROM ' . $this->notifications_table . ' n, ' . $this->notification_types_table . " nt
 			WHERE n.notification_type = '" . $this->get_type() . "'
-				AND n.item_id = " . self::get_item_id($post) . '
+				AND n.notification_type_id = " . self::get_notification_type_id($post) . '
 				AND nt.notification_type = n.notification_type
 				AND nt.notification_type_enabled = 1';
 		$result = $this->db->sql_query($sql);
@@ -186,7 +186,7 @@ class phpbb_notification_type_quote extends phpbb_notification_type_post
 		{
 			$sql = 'DELETE FROM ' . $this->notifications_table . "
 				WHERE notification_type = '" . $this->get_type() . "'
-					AND item_id = " . self::get_item_id($post) . '
+					AND notification_type_id = " . self::get_notification_type_id($post) . '
 					AND ' . $this->db->sql_in_set('user_id', $remove_notifications);
 			$this->db->sql_query($sql);
 		}

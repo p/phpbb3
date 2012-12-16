@@ -64,7 +64,7 @@ class phpbb_notification_type_topic extends phpbb_notification_type_base
 	*
 	* @param array $post The data from the post
 	*/
-	public static function get_item_id($post)
+	public static function get_notification_type_id($post)
 	{
 		return (int) $post['topic_id'];
 	}
@@ -184,8 +184,8 @@ class phpbb_notification_type_topic extends phpbb_notification_type_base
 			'FORUM_NAME'				=> htmlspecialchars_decode($this->get_data('forum_name')),
 			'TOPIC_TITLE'				=> htmlspecialchars_decode(censor_text($this->get_data('topic_title'))),
 
-			'U_TOPIC'					=> generate_board_url() . "/viewtopic.{$this->php_ext}?f={$this->item_parent_id}&t={$this->item_id}",
-			'U_VIEW_TOPIC'				=> generate_board_url() . "/viewtopic.{$this->php_ext}?f={$this->item_parent_id}&t={$this->item_id}",
+			'U_TOPIC'					=> generate_board_url() . "/viewtopic.{$this->php_ext}?f={$this->item_parent_id}&t={$this->notification_type_id}",
+			'U_VIEW_TOPIC'				=> generate_board_url() . "/viewtopic.{$this->php_ext}?f={$this->item_parent_id}&t={$this->notification_type_id}",
 			'U_FORUM'					=> generate_board_url() . "/viewforum.{$this->php_ext}?f={$this->item_parent_id}",
 			'U_STOP_WATCHING_FORUM'		=> generate_board_url() . "/viewforum.{$this->php_ext}?uid={$this->user_id}&f={$this->item_parent_id}&unwatch=forum",
 		);
@@ -198,7 +198,7 @@ class phpbb_notification_type_topic extends phpbb_notification_type_base
 	*/
 	public function get_url()
 	{
-		return append_sid($this->phpbb_root_path . 'viewtopic.' . $this->php_ext, "f={$this->item_parent_id}&amp;t={$this->item_id}");
+		return append_sid($this->phpbb_root_path . 'viewtopic.' . $this->php_ext, "f={$this->item_parent_id}&amp;t={$this->notification_type_id}");
 	}
 
 	/**
